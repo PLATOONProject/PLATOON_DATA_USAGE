@@ -21,6 +21,7 @@ public interface ContractRepository extends JpaRepository<ContractStore, Long> {
     Optional<ContractStore> findByContractId(String policyId);
     Optional<ContractStore> findByContractUuid(String contractUuid);
     Long  deleteByContractUuid(String contractUuid);
+    Iterable<ContractStore> findAllByProviderIdAndConsumerId(String providerId, String consumerId);
     
     
  

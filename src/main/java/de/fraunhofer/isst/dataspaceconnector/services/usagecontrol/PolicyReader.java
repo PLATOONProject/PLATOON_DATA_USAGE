@@ -129,6 +129,31 @@ public class PolicyReader {
         return URI.create(allowedConnectorAsString);
     }
 
+
+    /**
+     * Returns the allowed Role.
+     *
+     * @param rule the policy constraint object
+     * @return the URI of the Role
+     */
+    public URI getAllowedRole(Rule rule) {
+        Constraint constraint = rule.getConstraint().get(0);
+        URI allowedRole = constraint.getRightOperandReference();
+        return allowedRole;
+    }
+
+    /**
+     * Returns the allowed Purpose.
+     *
+     * @param rule the policy constraint object
+     * @return the URI of the Purpose
+     */
+    public URI getAllowedPurpose(Rule rule) {
+        Constraint constraint = rule.getConstraint().get(0);
+        URI allowedPurpose = constraint.getRightOperandReference();
+        return allowedPurpose;
+    }
+
     /**
      * Inner class for a time interval format.
      */

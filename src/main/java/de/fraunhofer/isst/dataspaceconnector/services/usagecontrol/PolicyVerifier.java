@@ -1,8 +1,11 @@
 package de.fraunhofer.isst.dataspaceconnector.services.usagecontrol;
 
+import com.tecnalia.datausage.utils.HttpUtils;
 import de.fraunhofer.iais.eis.Constraint;
 import de.fraunhofer.iais.eis.Contract;
+import de.fraunhofer.iais.eis.Permission;
 import de.fraunhofer.iais.eis.Rule;
+import java.io.UnsupportedEncodingException;
 //import de.fraunhofer.isst.dataspaceconnector.services.messages.implementation.LogMessageService;
 //import de.fraunhofer.isst.dataspaceconnector.services.messages.implementation.NotificationMessageService;
 //import de.fraunhofer.isst.dataspaceconnector.services.utils.HttpUtils;
@@ -15,7 +18,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.Duration;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -33,7 +39,7 @@ public class PolicyVerifier {
     private final PolicyReader policyReader;
     //private final NotificationMessageService notificationMessageService;
     //private final LogMessageService logMessageService;
-    //private final HttpUtils httpUtils;
+    private final HttpUtils httpUtils;
 
     /**
      * Constructor for PolicyVerifier.
@@ -43,7 +49,7 @@ public class PolicyVerifier {
     @Autowired
 //    public PolicyVerifier(PolicyReader policyReader, LogMessageService logMessageService,
 //        NotificationMessageService notificationMessageService, HttpUtils httpUtils)
-    public PolicyVerifier(PolicyReader policyReader)
+    public PolicyVerifier(PolicyReader policyReader, HttpUtils httpUtils)
         throws IllegalArgumentException {
         if (policyReader == null)
             throw new IllegalArgumentException("The PolicyReader cannot be null.");
@@ -52,15 +58,15 @@ public class PolicyVerifier {
             throw new IllegalArgumentException("The LogMessageService cannot be null.");
 
         if (notificationMessageService == null)
-            throw new IllegalArgumentException("The NotificationMessageService cannot be null.");
+            throw new IllegalArgumentException("The NotificationMessageService cannot be null.");*/
 
         if (httpUtils == null)
-            throw new IllegalArgumentException("The HttpUtils cannot be null.");*/
+            throw new IllegalArgumentException("The HttpUtils cannot be null.");
 
         this.policyReader = policyReader;
         /*this.logMessageService = logMessageService;
-        this.notificationMessageService = notificationMessageService;
-        this.httpUtils = httpUtils;*/
+        this.notificationMessageService = notificationMessageService;*/
+        this.httpUtils = httpUtils;
     }
 
     /**
@@ -91,6 +97,7 @@ public class PolicyVerifier {
      * @return true, if the access was logged; false otherwise.
      */
     public boolean logAccess() {
+        //TODO: PLATOON
         Map<String, String> response;
         try {
             //TODO: PLATOON - Log Access
@@ -108,45 +115,16 @@ public class PolicyVerifier {
         }*/
     }
 
-    /**
-     * Notifies a participant about data access and allows the access only if that operation was successful.
-     * TODO: Validate response in more detail.
-     *
-     * @param contract a {@link de.fraunhofer.iais.eis.Contract} object.
-     * @return true, if the participant was notified; false otherwise.
-     */
-    public boolean sendNotification(Contract contract) {
-        Rule rule = contract.getPermission().get(0).getPostDuty().get(0);
-        String recipient = policyReader.getEndpoint(rule);
-
-        Map<String, String> response;
-        try {
-            //TODO: PLATOON - Send Notification
-            //notificationMessageService.setRequestParameters(URI.create(recipient));
-            //response = notificationMessageService.sendRequestMessage("");
-            return allowAccess();
-        } catch (Exception exception) {
-            LOGGER.warn("Notification message could not be sent. [exception=({})]", exception.getMessage());
-            return allowAccess();
-        }
-
-        /*if (response != null) {
-            return allowAccess();
-        } else {
-            LOGGER.warn("No response received.");
-            return allowAccess();
-        }*/
-    }
 
     /**
      * Checks if the requested access is in the allowed time interval.
      *
-     * @param contract a {@link de.fraunhofer.iais.eis.Contract} object.
+     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
      * @return true, if the current date is within the time interval; false otherwise.
      */
-    public boolean checkInterval(Contract contract) {
+    public boolean checkInterval(ArrayList<Permission> permissionList) {
         PolicyReader.TimeInterval timeInterval = policyReader
-            .getTimeInterval(contract.getPermission().get(0));
+            .getTimeInterval(permissionList.get(0));
         Date date = new Date();
 
         if (date.after(timeInterval.getStart()) && date.before(timeInterval.getEnd())) {
@@ -170,15 +148,15 @@ public class PolicyVerifier {
     /**
      * Adds a duration to a given date and checks if the duration has already been exceeded.
      *
-     * @param created  the date when the resource was created.
-     * @param contract a {@link de.fraunhofer.iais.eis.Contract} object.
+     * @param created        the date when the resource was created.
+     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects..
      * @return true, the duration has not been exceeded; false otherwise.
      */
-    public boolean checkDuration(Date created, Contract contract) {
+    public boolean checkDuration(Date created, ArrayList<Permission> permissionList) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(created);
         try {
-            Duration duration = policyReader.getDuration(contract.getPermission().get(0));
+            Duration duration = policyReader.getDuration(permissionList.get(0));
 
             cal.add(Calendar.SECOND, duration.getSeconds());
             cal.add(Calendar.MINUTE, duration.getMinutes());
@@ -196,52 +174,79 @@ public class PolicyVerifier {
     /**
      * Checks whether the maximum number of accesses has already been reached.
      *
-     * @param contract a {@link de.fraunhofer.iais.eis.Contract} object.
-     * @param uuid     a {@link java.util.UUID} object.
+     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param targetId       the data target URI.
      * @return true, if the maximum number of accesses has not been reached yet; false otherwise.
      */
-    public boolean checkFrequency(Contract contract, UUID uuid) {
-        int max = policyReader.getMaxAccess(contract.getPermission().get(0));
-        URI pip = policyReader.getPipEndpoint(contract.getPermission().get(0));
-
-        //TODO: PLATOON - Num. veces accedido el dato
-        //TODO: Si queremos implementar la policy de Num. veces accedido, habrá que implmentar este código
-        /*
+    public boolean checkFrequency(ArrayList<Permission> permissionList, String targetId) {
+        int max = policyReader.getMaxAccess(permissionList.get(0));
+        URI pip = policyReader.getPipEndpoint(permissionList.get(0));
+        
         try {
-            String accessed = httpUtils.sendHttpsGetRequestWithBasicAuth(
-                    pip + uuid.toString() + "/access", "admin",
-                    "password", null);
+            String encodedTargetUri =  URLEncoder.encode(targetId, StandardCharsets.UTF_8.toString());
+            String accessed = httpUtils.sendHttpGetRequest(
+                    pip + "?targetUri="+ encodedTargetUri);
             if (Integer.parseInt(accessed) >= max) {
                 return inhibitAccess();
             } else {
                 return allowAccess();
             }
-        } catch (URISyntaxException | RuntimeException e) {
+        } catch (UnsupportedEncodingException | URISyntaxException | RuntimeException e) {
             return inhibitAccess();
-        }*/
-        return allowAccess();
-    }
-
-    /**
-     * Checks if the specified duration since resource creation or the specified maximum date for resource access
-     * has already been exceeded.
-     *
-     * @param rule a {@link de.fraunhofer.iais.eis.Rule} object.
-     * @return true, if the duration or date has been exceeded; false otherwise.
-     * @throws java.text.ParseException if a duration cannot be parsed.
-     */
-    public boolean checkForDelete(Rule rule) throws ParseException {
-        Date max = policyReader.getDate(rule);
-        if (max != null) {
-            return checkDate(new Date(), max);
-        } else {
-            return false;
         }
     }
 
-    public boolean checkIssuerConnector(Contract contract, URI issuerConnector) {
-        Rule rule = contract.getPermission().get(0);
-        URI allowedURI = policyReader.getAllowedConnector(rule);
-        return allowedURI.equals(issuerConnector);
+    /**
+     * Checks whether the consumer Role is allowed to access the data.
+     *
+     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param consumerURI    the consumer URI.
+     * @return true, if the consumer Role is allowed to access the data; false otherwise.
+     */
+    public boolean checkRole(ArrayList<Permission> permissionList, URI consumerURI) {
+        Rule rule = permissionList.get(0);
+        URI allowedRoleURI = policyReader.getAllowedRole(rule);
+        String allowedRoleAsString = allowedRoleURI.toString();
+        URI pip = policyReader.getPipEndpoint(permissionList.get(0));
+        
+        try {
+            String encodedConsumerUri =  URLEncoder.encode(consumerURI.toString(), StandardCharsets.UTF_8.toString());
+            String consumerRoleAsString = httpUtils.sendHttpGetRequest(
+                    pip + "?consumerUri="+ encodedConsumerUri);
+            if (allowedRoleAsString.equals(consumerRoleAsString)) {
+                return allowAccess();
+            } else {
+                return inhibitAccess();
+            }
+        } catch (UnsupportedEncodingException | URISyntaxException | RuntimeException e) {
+            return inhibitAccess();
+        }
+    }
+
+    /**
+     * Checks whether the consumerś Purpose is allowed to access the data.
+     *
+     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param consumerURI    the consumer URI.
+     * @return true, if the consumerś Purpose is allowed to access the data; false otherwise.
+     */
+    public boolean checkPurpose(ArrayList<Permission> permissionList, URI consumerURI) {
+        Rule rule = permissionList.get(0);
+        URI allowedPurposeURI = policyReader.getAllowedPurpose(rule);
+        String allowedPurposeAsString = allowedPurposeURI.toString();
+        URI pip = policyReader.getPipEndpoint(permissionList.get(0));
+        
+        try {
+            String encodedConsumerUri =  URLEncoder.encode(consumerURI.toString(), StandardCharsets.UTF_8.toString());
+            String consumerPurposeAsString = httpUtils.sendHttpGetRequest(
+                    pip + "?consumerUri="+ encodedConsumerUri);
+            if (allowedPurposeAsString.equals(consumerPurposeAsString)) {
+                return allowAccess();
+            } else {
+                return inhibitAccess();
+            }
+        } catch (UnsupportedEncodingException | URISyntaxException | RuntimeException e) {
+            return inhibitAccess();
+        }
     }
 }
