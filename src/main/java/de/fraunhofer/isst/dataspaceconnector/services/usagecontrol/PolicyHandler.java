@@ -47,11 +47,11 @@ public class PolicyHandler {
      */
     public Pattern getPattern(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList) {
 
-        if (prohibitionList != null && prohibitionList.get(0) != null) {
+        if (prohibitionList != null && prohibitionList.size() > 0 && prohibitionList.get(0) != null) {
             return Pattern.PROHIBIT_ACCESS;
         }
 
-        if (permissionList != null && permissionList.get(0) != null) {
+        if (permissionList != null && permissionList.size() > 0 && permissionList.get(0) != null) {
             Permission permission = permissionList.get(0);
             //Action action = permission.getAction().get(0);
             //if(action.)

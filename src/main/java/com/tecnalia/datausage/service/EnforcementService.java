@@ -5,9 +5,11 @@
  */
 package com.tecnalia.datausage.service;
 
+import com.tecnalia.datausage.model.AccessStore;
 import com.tecnalia.datausage.model.IdsUseObject;
 import com.tecnalia.datausage.model.ContractStore;
 import com.tecnalia.datausage.model.RuleStore;
+import com.tecnalia.datausage.repository.AccessRepository;
 import com.tecnalia.datausage.repository.ContractRepository;
 import com.tecnalia.datausage.repository.RuleRepository;
 import de.fraunhofer.iais.eis.Contract;
@@ -15,10 +17,12 @@ import de.fraunhofer.iais.eis.Permission;
 import de.fraunhofer.iais.eis.Prohibition;
 import de.fraunhofer.iais.eis.Rule;
 import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
+import de.fraunhofer.iais.eis.util.TypedLiteral;
 import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.UnsupportedPatternException;
 import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyHandler;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.slf4j.Logger;
@@ -41,6 +45,9 @@ public class EnforcementService {
     
     @Autowired    
     private RuleRepository ruleRepository;
+
+    @Autowired   
+    private AccessRepository accessRepository;   
 
     @Autowired
     PolicyHandler policyHandler;
@@ -72,9 +79,10 @@ public class EnforcementService {
             Serializer serializer = new Serializer();
             try {
                 Rule rule = serializer.deserialize(ruleTxt, Rule.class);
-                if(rule.getClass().getSimpleName().compareToIgnoreCase("Permission") == 0)
+                String ruleType = getRuleType(rule);
+                if(ruleType.compareToIgnoreCase("Permission") == 0)
                     permissionList.add((Permission)rule);
-                else if(rule.getClass().getSimpleName().compareToIgnoreCase("Prohibition") == 0)
+                else if(ruleType.compareToIgnoreCase("Prohibition") == 0)
                     prohibitionList.add((Prohibition)rule);
              } catch (Exception e) {
                 return new ResponseEntity<>("Invalid rule format", HttpStatus.BAD_REQUEST);
@@ -128,25 +136,38 @@ public class EnforcementService {
         return validContractStore;
     }
     
+    String getRuleType(Rule rule) {
+        String ruleType = "";
+        List<TypedLiteral> labelsList = rule.getLabel();
+        for (TypedLiteral lit: labelsList) {
+            String val = lit.getValue();
+            if ((val.compareToIgnoreCase("Permission")== 0) || (val.compareToIgnoreCase("Prohibition")== 0)) {
+                ruleType= val;
+                break;
+            }
+        }
+        
+        return ruleType;
+    }
+    
     @Transactional
     void incrementAccessFrequency(String targetDataUri, String consumerUri) {
-        //TODO: Increment by 1 the access frequency
-        /*
-        Optional<ContractStore> bCheckExistsTarget = this.contractRepository.findByContractId(targetDataUri, consumerUri);
+        //Increment by 1 the access frequency
+        Optional<AccessStore> bCheckExistsAccess = this.accessRepository.findByConsumerUriAndTargetUri(targetDataUri, consumerUri);
+        AccessStore accessStore;
+                accessStore = (AccessStore)bCheckExistsAccess.get();
         //if exists update
-        if (bCheckExistsTarget.isPresent()) {
-            contractStore = (ContractStore)bCheckExistsContract.get();
-            contractStore.setContractAsString(contractStore,getXX() + 1);
-            this.contractRepository.saveAndFlush(contractStore);                              
+        if (bCheckExistsAccess.isPresent()) {
+            accessStore = (AccessStore)bCheckExistsAccess.get();
+            accessStore.setNumAccess(accessStore.getNumAccess() + 1);
+            this.accessRepository.saveAndFlush(accessStore);                              
         } else {
         //insert 
-            contractStore = new ContractStore();
-            contractStore.setContractId(contract.getId().toString());
-            contractStore.setContractAsString(policy);
-            contractStore.setConsumerId(contract.getConsumer().toString());
-            this.contractRepository.saveAndFlush(contractStore);
+            accessStore.setConsumerUri(consumerUri);
+            accessStore.setTargetUri(targetDataUri);
+            accessStore.setNumAccess(1);
+            this.accessRepository.saveAndFlush(accessStore);
         }
-*/
         return;        
     }
 }
