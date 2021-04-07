@@ -176,16 +176,18 @@ public class PolicyVerifier {
      *
      * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
      * @param targetId       the data target URI.
+     * @param consumerURI    the consumer URI.
      * @return true, if the maximum number of accesses has not been reached yet; false otherwise.
      */
-    public boolean checkFrequency(ArrayList<Permission> permissionList, String targetId) {
+    public boolean checkFrequency(ArrayList<Permission> permissionList, String targetId, String consumerUri) {
         int max = policyReader.getMaxAccess(permissionList.get(0));
         URI pip = policyReader.getPipEndpoint(permissionList.get(0));
         
         try {
             String encodedTargetUri =  URLEncoder.encode(targetId, StandardCharsets.UTF_8.toString());
+            String encodedConsumerUri = URLEncoder.encode(consumerUri, StandardCharsets.UTF_8.toString());
             String accessed = httpUtils.sendHttpGetRequest(
-                    pip + "?targetUri="+ encodedTargetUri);
+                    pip + "?targetUri="+ encodedTargetUri + "&consumerUri="+ encodedConsumerUri);
             if (Integer.parseInt(accessed) >= max) {
                 return inhibitAccess();
             } else {

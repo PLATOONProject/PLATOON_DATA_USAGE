@@ -36,6 +36,6 @@ public interface EnforceApi {
     @RequestMapping(value = "/enforce/usage/use",
         consumes = { "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<Void> usageControlUseUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody IdsUseObject body);
+    ResponseEntity<Object> usageControlUseUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody IdsUseObject body);
 
 }

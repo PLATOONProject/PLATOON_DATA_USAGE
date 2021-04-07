@@ -11,6 +11,7 @@ import de.fraunhofer.iais.eis.Permission;
 import de.fraunhofer.iais.eis.Prohibition;
 import de.fraunhofer.iais.eis.Rule;
 import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
+import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.UnsupportedPatternException;
 import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +42,7 @@ import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,7 +75,7 @@ public class EnforceApiController implements EnforceApi {
         this.request = request;
     }
 
-    public ResponseEntity<Void> usageControlUseUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody IdsUseObject body) {
+    public ResponseEntity<Object> usageControlUseUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody IdsUseObject body) {
         String accept = request.getHeader("Accept");
 
         //Get contracts from ContractAgreement table applied to this providerURI, consumerUri
@@ -102,11 +104,11 @@ public class EnforceApiController implements EnforceApi {
                     }
                 } 
             } catch (Exception e) {
-                return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Incorrect contract format", HttpStatus.BAD_REQUEST);
             }
         }
         if(validContract == null)
-            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("No valid contracts found", HttpStatus.BAD_REQUEST);
         
         //Get rules from rule table applied to the contract, targetDataUri
         Iterable<RuleStore> ruleList = this.ruleRepository.findAllByContractUuidAndTargetId(validContractUuid, body.getTargetDataUri());
@@ -123,26 +125,31 @@ public class EnforceApiController implements EnforceApi {
                 else if(rule.getClass().getSimpleName().compareToIgnoreCase("Prohibition") == 0)
                     prohibitionList.add((Prohibition)rule);
              } catch (Exception e) {
-                return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Invalid rule format", HttpStatus.BAD_REQUEST);
             }
         }
-
-        try {
-            URI consumerURI = new URI("");
         
-            boolean consuming = true;
-            //if(body.getConsuming()) {
-            if(consuming) {
+        try {
+            boolean allowAccess = false;
+            URI consumerURI = new URI(body.getConsumerUri());
+            if(body.isConsuming()) {
                //For each rule, apply enforcement
-               boolean allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri());
+               allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri());               
             } else {
                //For each rule, apply enforcement            
-               boolean allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, consumerURI);
+               allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, consumerURI);
             }
-        } catch (Exception e) {
-            return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);            
+            
+            if(allowAccess) {
+                return new ResponseEntity<>(body.getDataObject(), HttpStatus.OK); 
+            } else {
+                return new ResponseEntity<>("PDP decided to inhibit the usage: Event is not allowed according to policy", HttpStatus.FORBIDDEN); 
+            }
+        } catch (URISyntaxException e) {
+            return new ResponseEntity<>("Incorrect conumer URI", HttpStatus.BAD_REQUEST);                      
+        } catch (UnsupportedPatternException e) {
+            return new ResponseEntity<>("Unsupported Policy Pattern", HttpStatus.BAD_REQUEST);                      
         }
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }
