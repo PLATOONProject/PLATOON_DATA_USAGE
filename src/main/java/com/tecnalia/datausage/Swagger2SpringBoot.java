@@ -10,7 +10,8 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 
 @SpringBootApplication
 @EnableOpenApi
-@ComponentScan(basePackages = { "com.tecnalia.datausage", "com.tecnalia.datausage.api" , "com.tecnalia.datausage.configuration"})
+@ComponentScan(basePackages = { "com.tecnalia.datausage", "com.tecnalia.datausage.api" , "com.tecnalia.datausage.configuration", 
+    "com.tecnalia.datausage.utils", "de.fraunhofer.isst.dataspaceconnector.services.usagecontrol"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     @Override

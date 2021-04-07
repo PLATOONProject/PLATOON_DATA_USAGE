@@ -36,13 +36,13 @@ import org.springframework.stereotype.Service;
 public class EnforcementService {
     private static final Logger log = LoggerFactory.getLogger(EnforcementService.class);
 
-   @Autowired
+    @Autowired
     private  ContractRepository contractRepository;
     
     @Autowired    
     private RuleRepository ruleRepository;
 
-    @Autowired 
+    @Autowired
     PolicyHandler policyHandler;
 
     public ResponseEntity<Object> enforce(IdsUseObject body) {

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**
@@ -24,6 +25,7 @@ import org.springframework.web.client.HttpClientErrorException;
  * 
  * This class builds up HTTP or HTTPS endpoint connections and sends GET requests.
  */
+@Service
 public class HttpUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
     
