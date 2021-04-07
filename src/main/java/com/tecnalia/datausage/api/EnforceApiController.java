@@ -131,13 +131,12 @@ public class EnforceApiController implements EnforceApi {
         
         try {
             boolean allowAccess = false;
-            URI consumerURI = new URI(body.getConsumerUri());
             if(body.isConsuming()) {
                //For each rule, apply enforcement
-               allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri());               
+               allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri(), body.getConsumerUri());               
             } else {
                //For each rule, apply enforcement            
-               allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, consumerURI);
+               allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, body.getConsumerUri());
             }
             
             if(allowAccess) {
@@ -145,8 +144,6 @@ public class EnforceApiController implements EnforceApi {
             } else {
                 return new ResponseEntity<>("PDP decided to inhibit the usage: Event is not allowed according to policy", HttpStatus.FORBIDDEN); 
             }
-        } catch (URISyntaxException e) {
-            return new ResponseEntity<>("Incorrect conumer URI", HttpStatus.BAD_REQUEST);                      
         } catch (UnsupportedPatternException e) {
             return new ResponseEntity<>("Unsupported Policy Pattern", HttpStatus.BAD_REQUEST);                      
         }

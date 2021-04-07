@@ -110,7 +110,7 @@ public class PolicyHandler {
      * @return whether the data can be provided.
      * @throws UnsupportedPatternException if no pattern could be recognized.
      */
-    public boolean onDataProvision(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, URI consumerURI) throws UnsupportedPatternException {
+    public boolean onDataProvision(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, String consumerURI) throws UnsupportedPatternException {
         switch (getPattern(permissionList, prohibitionList)) {
             case PROVIDE_ACCESS:
                 return policyVerifier.allowAccess();
@@ -137,7 +137,7 @@ public class PolicyHandler {
      * @return whether the data can be accessed.
      * @throws UnsupportedPatternException if no pattern could be recognized.
      */
-    public boolean onDataAccess(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, Date resourceCreated, String targetId) throws UnsupportedPatternException {
+    public boolean onDataAccess(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, Date resourceCreated, String targetId, String consumerURI) throws UnsupportedPatternException {
         final var ignoreUnsupportedPatterns = false;
 
         Pattern pattern;
@@ -158,7 +158,7 @@ public class PolicyHandler {
             case USAGE_LOGGING:
                 return policyVerifier.logAccess();
             case N_TIMES_USAGE:
-                return policyVerifier.checkFrequency(permissionList, targetId);
+                return policyVerifier.checkFrequency(permissionList, targetId, consumerURI);
             default:
                 return true;
         }

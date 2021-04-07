@@ -205,14 +205,14 @@ public class PolicyVerifier {
      * @param consumerURI    the consumer URI.
      * @return true, if the consumer Role is allowed to access the data; false otherwise.
      */
-    public boolean checkRole(ArrayList<Permission> permissionList, URI consumerURI) {
+    public boolean checkRole(ArrayList<Permission> permissionList, String consumerURI) {
         Rule rule = permissionList.get(0);
         URI allowedRoleURI = policyReader.getAllowedRole(rule);
         String allowedRoleAsString = allowedRoleURI.toString();
         URI pip = policyReader.getPipEndpoint(permissionList.get(0));
         
         try {
-            String encodedConsumerUri =  URLEncoder.encode(consumerURI.toString(), StandardCharsets.UTF_8.toString());
+            String encodedConsumerUri =  URLEncoder.encode(consumerURI, StandardCharsets.UTF_8.toString());
             String consumerRoleAsString = httpUtils.sendHttpGetRequest(
                     pip + "?consumerUri="+ encodedConsumerUri);
             if (allowedRoleAsString.equals(consumerRoleAsString)) {
@@ -232,14 +232,14 @@ public class PolicyVerifier {
      * @param consumerURI    the consumer URI.
      * @return true, if the consumerś Purpose is allowed to access the data; false otherwise.
      */
-    public boolean checkPurpose(ArrayList<Permission> permissionList, URI consumerURI) {
+    public boolean checkPurpose(ArrayList<Permission> permissionList, String consumerURI) {
         Rule rule = permissionList.get(0);
         URI allowedPurposeURI = policyReader.getAllowedPurpose(rule);
         String allowedPurposeAsString = allowedPurposeURI.toString();
         URI pip = policyReader.getPipEndpoint(permissionList.get(0));
         
         try {
-            String encodedConsumerUri =  URLEncoder.encode(consumerURI.toString(), StandardCharsets.UTF_8.toString());
+            String encodedConsumerUri =  URLEncoder.encode(consumerURI, StandardCharsets.UTF_8.toString());
             String consumerPurposeAsString = httpUtils.sendHttpGetRequest(
                     pip + "?consumerUri="+ encodedConsumerUri);
             if (allowedPurposeAsString.equals(consumerPurposeAsString)) {
