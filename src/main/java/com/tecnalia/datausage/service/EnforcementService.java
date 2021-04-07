@@ -153,16 +153,15 @@ public class EnforcementService {
     @Transactional
     void incrementAccessFrequency(String targetDataUri, String consumerUri) {
         //Increment by 1 the access frequency
-        Optional<AccessStore> bCheckExistsAccess = this.accessRepository.findByConsumerUriAndTargetUri(targetDataUri, consumerUri);
-        AccessStore accessStore;
-                accessStore = (AccessStore)bCheckExistsAccess.get();
+        Optional<AccessStore> bCheckExistsAccess = this.accessRepository.findByConsumerUriAndTargetUri(consumerUri, targetDataUri);
         //if exists update
         if (bCheckExistsAccess.isPresent()) {
-            accessStore = (AccessStore)bCheckExistsAccess.get();
+            AccessStore accessStore = (AccessStore)bCheckExistsAccess.get();
             accessStore.setNumAccess(accessStore.getNumAccess() + 1);
             this.accessRepository.saveAndFlush(accessStore);                              
         } else {
-        //insert 
+        //insert
+            AccessStore accessStore = new AccessStore();
             accessStore.setConsumerUri(consumerUri);
             accessStore.setTargetUri(targetDataUri);
             accessStore.setNumAccess(1);
