@@ -1,20 +1,15 @@
 package de.fraunhofer.isst.dataspaceconnector.services.usagecontrol;
 
 import de.fraunhofer.iais.eis.*;
-import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.ContractFormatException;
 import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.UnsupportedPatternException;
-import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
-import com.tecnalia.datausage.model.ContractStore;
-
+import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * This class provides policy pattern recognition and calls the {@link
@@ -26,7 +21,6 @@ public class PolicyHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyHandler.class);
 
-    private static Contract contract;
     private final PolicyVerifier policyVerifier;
 
     /**
@@ -44,60 +38,46 @@ public class PolicyHandler {
     }
 
     /**
-     * Deserializes a contract object from a string.
-     *
-     * @param contract the contract as a string.
-     * @return the contract.
-     * @throws ContractFormatException if the string is not a valid contract and could thus not be deserialized.
-     */
-    public Contract validateContract(String contract) throws ContractFormatException {
-        try {
-            Serializer serializer = new Serializer();
-            Contract contractObj = serializer.deserialize(contract, Contract.class);
-            return contractObj;
-        } catch (Exception e) {
-            LOGGER.debug("Policy pattern is not supported.");
-            throw new ContractFormatException("Contract could not be deserialized. ", e);
-        }
-    }
-
-    /**
      * Reads the properties of an ODRL policy to automatically recognize the policy pattern.
      *
-     * @param policy the policy as a string.
+     * @param permissionList  a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param prohibitionList a list of {@link de.fraunhofer.iais.eis.Prohibition} objects.
      * @return the recognized policy pattern.
      * @throws UnsupportedPatternException if no pattern could be recognized.
-     * @throws ContractFormatException if the string could not be deserialized.
      */
-    public Pattern getPattern(String policy) throws UnsupportedPatternException,
-        ContractFormatException {
-        contract = validateContract(policy);
+    public Pattern getPattern(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList) {
 
-        if (contract.getProhibition() != null && contract.getProhibition().get(0) != null) {
+        if (prohibitionList != null && prohibitionList.get(0) != null) {
             return Pattern.PROHIBIT_ACCESS;
         }
 
-        if (contract.getPermission() != null && contract.getPermission().get(0) != null) {
-            Permission permission = contract.getPermission().get(0);
+        if (permissionList != null && permissionList.get(0) != null) {
+            Permission permission = permissionList.get(0);
+            //Action action = permission.getAction().get(0);
+            //if(action.)
             ArrayList<? extends Constraint> constraints = permission.getConstraint();
             ArrayList<? extends Duty> postDuties = permission.getPostDuty();
 
             if (constraints != null && constraints.get(0) != null) {
+                Action action = postDuties.get(0).getAction().get(0);
+                if (action != Action.USE) {
+                    throw new UnsupportedPatternException(
+                        "The recognized policy pattern is not supported by this connector.");
+                }
                 if (constraints.size() > 1) {
-                    if (postDuties != null && postDuties.get(0) != null) {
-                        return Pattern.USAGE_UNTIL_DELETION;
-                    } else {
-                        return Pattern.USAGE_DURING_INTERVAL;
-                    }
+                    return Pattern.USAGE_DURING_INTERVAL;
                 } else {
                     LeftOperand leftOperand = constraints.get(0).getLeftOperand();
                     if (leftOperand == LeftOperand.COUNT) {
                         return Pattern.N_TIMES_USAGE;
                     } else if (leftOperand == LeftOperand.ELAPSED_TIME) {
                         return Pattern.DURATION_USAGE;
-                    } else if ((leftOperand == LeftOperand.SYSTEM )
+                    } else if ((leftOperand == LeftOperand.USER )
+                            && (constraints.get(0).getOperator() == BinaryOperator.HAS_MEMBERSHIP))  {
+                        return Pattern.ROLE_RESTRICTED_USAGE;
+                    } else if ((leftOperand == LeftOperand.PURPOSE )
                             && (constraints.get(0).getOperator() == BinaryOperator.SAME_AS))  {
-                        return Pattern.CONNECTOR_RESTRICTED_USAGE;
+                        return Pattern.PURPOSE_RESTRICTED_USAGE;
                     } else {
                         throw new UnsupportedPatternException(
                             "The recognized policy pattern is not supported by this connector.");
@@ -106,9 +86,7 @@ public class PolicyHandler {
             } else {
                 if (postDuties != null && postDuties.get(0) != null) {
                     Action action = postDuties.get(0).getAction().get(0);
-                    if (action == Action.NOTIFY) {
-                        return Pattern.USAGE_NOTIFICATION;
-                    } else if (action == Action.LOG) {
+                    if (action == Action.LOG) {
                         return Pattern.USAGE_LOGGING;
                     } else {
                         throw new UnsupportedPatternException(
@@ -127,23 +105,23 @@ public class PolicyHandler {
     /**
      * Implements the policy restrictions depending on the policy pattern type on data provision (as provider).
      *
-     * @param policy the resource's usage policy.
+     * @param permissionList  a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param prohibitionList a list of {@link de.fraunhofer.iais.eis.Prohibition} objects.
      * @return whether the data can be provided.
      * @throws UnsupportedPatternException if no pattern could be recognized.
-     * @throws RequestFormatException if the string could not be deserialized.
      */
-    public boolean onDataProvision(String policy, URI issuerConnector) throws UnsupportedPatternException,
-        ContractFormatException {
-        switch (getPattern(policy)) {
+    public boolean onDataProvision(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, URI consumerURI) throws UnsupportedPatternException {
+        switch (getPattern(permissionList, prohibitionList)) {
             case PROVIDE_ACCESS:
                 return policyVerifier.allowAccess();
             case PROHIBIT_ACCESS:
                 return policyVerifier.inhibitAccess();
             case USAGE_DURING_INTERVAL:
-            case USAGE_UNTIL_DELETION:
-                return policyVerifier.checkInterval(contract);
-            case CONNECTOR_RESTRICTED_USAGE:
-                return policyVerifier.checkIssuerConnector(contract, issuerConnector);
+                return policyVerifier.checkInterval(permissionList);
+            case ROLE_RESTRICTED_USAGE:
+                return policyVerifier.checkRole(permissionList, consumerURI);
+            case PURPOSE_RESTRICTED_USAGE:
+                return policyVerifier.checkPurpose(permissionList, consumerURI);
             default:
                 return true;
         }
@@ -152,19 +130,19 @@ public class PolicyHandler {
     /**
      * Implements the policy restrictions depending on the policy pattern type on data access (as consumer).
      *
-     * @param dataResource the accessed resource.
+     * @param permissionList  a list of {@link de.fraunhofer.iais.eis.Permission} objects.
+     * @param prohibitionList a list of {@link de.fraunhofer.iais.eis.Prohibition} objects.
+     * @param resourceCreated the date when the resource was created.
+     * @param targetId        the URI of the target data.
      * @return whether the data can be accessed.
      * @throws UnsupportedPatternException if no pattern could be recognized.
-     * @throws ContractFormatException if the string could not be deserialized.
      */
-    public boolean onDataAccess(ContractStore contractObj, Date resourceCreated, UUID resourceUUID) throws UnsupportedPatternException,
-        ContractFormatException{
-        final var policy = contractObj.getContractAsString();
+    public boolean onDataAccess(ArrayList<Permission> permissionList, ArrayList<Prohibition> prohibitionList, Date resourceCreated, String targetId) throws UnsupportedPatternException {
         final var ignoreUnsupportedPatterns = false;
 
         Pattern pattern;
         try {
-            pattern = getPattern(policy);
+            pattern = getPattern(permissionList, prohibitionList);
         } catch (UnsupportedPatternException exception) {
             if (!ignoreUnsupportedPatterns)
                 throw new UnsupportedPatternException(exception.getMessage());
@@ -174,20 +152,18 @@ public class PolicyHandler {
 
         switch (pattern) {
             case USAGE_DURING_INTERVAL:
-            case USAGE_UNTIL_DELETION:
-                return policyVerifier.checkInterval(contract);
+                return policyVerifier.checkInterval(permissionList);
             case DURATION_USAGE:
-                return policyVerifier.checkDuration(resourceCreated, contract);
+                return policyVerifier.checkDuration(resourceCreated, permissionList);
             case USAGE_LOGGING:
                 return policyVerifier.logAccess();
             case N_TIMES_USAGE:
-                return policyVerifier.checkFrequency(contract, resourceUUID);
-            case USAGE_NOTIFICATION:
-                return policyVerifier.sendNotification(contract);
+                return policyVerifier.checkFrequency(permissionList, targetId);
             default:
                 return true;
         }
     }
+
 
     public enum Pattern {
         /**
@@ -211,11 +187,6 @@ public class PolicyHandler {
          */
         USAGE_DURING_INTERVAL("USAGE_DURING_INTERVAL"),
         /**
-         * Type: DeleteAfterInterval v2.0: DELETE_AFTER("delete-after")
-         * https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/TimeRestrictedUsageTemplates/USAGE_UNTIL_DELETION_OFFER_TEMPLATE.jsonld
-         */
-        USAGE_UNTIL_DELETION("USAGE_UNTIL_DELETION"),
-        /**
          * Type: Logging v2.0: LOG_ACCESS("log-access") https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/UsageLoggingTemplates/USAGE_LOGGING_OFFER_TEMPLATE.jsonld
          */
         USAGE_LOGGING("USAGE_LOGGING"),
@@ -223,10 +194,9 @@ public class PolicyHandler {
          * Type: Notification https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/UsageNotificationTemplates/USAGE_NOTIFICATION_OFFER_TEMPLATE.jsonld
          */
         USAGE_NOTIFICATION("USAGE_NOTIFICATION"),
-        /**
-         * Type: Connector-restricted access https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/ConnectorbasedAgreementTemplates/CONNECTORBASED_OFFER_TEMPLATE.jsonld
-         */
-        CONNECTOR_RESTRICTED_USAGE("CONNECTOR_RESTRICTED_USAGE");
+
+        ROLE_RESTRICTED_USAGE("ROLE_RESTRICTED_USAGE"),
+        PURPOSE_RESTRICTED_USAGE("PURPOSE_RESTRICTED_USAGE");
 
         private final String pattern;
 

@@ -1,0 +1,118 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.tecnalia.datausage.utils;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Objects;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+
+/**
+ *
+ * @author 107126
+ * 
+ * This class builds up HTTP or HTTPS endpoint connections and sends GET requests.
+ */
+public class HttpUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
+    
+    /**
+     * Sends a GET request to an external HTTP endpoint
+     *
+     * @param address the URL.
+     * @return the HTTP response if HTTP code is OK (200).
+     * @throws URISyntaxException if the input address is not a valid URI.
+     * @throws RuntimeException if an error occurred when connecting or processing the HTTP
+     *                               request.
+     */
+    public String sendHttpGetRequest(String address) throws
+        RuntimeException, URISyntaxException {
+        OkHttpClient client = new OkHttpClient();
+        try {
+            Request request = new Request.Builder()
+                .url(address)
+                .build();
+
+            Response response = client.newCall(request).execute();
+
+            final var responseCodeOk = 200;
+            final var responseCodeUnauthorized = 401;
+            final var responseMalformed = -1;
+
+            final var responseCode = response.code();
+
+            if(responseCode == responseCodeOk){
+                return Objects.requireNonNull(response.body()).string();
+            } else if (responseCode == responseCodeUnauthorized) {
+                // The request is not authorized.
+                LOGGER.debug("Could not retrieve data. Unauthorized access. [url=({})]", address);
+                throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+            } else if (responseCode == responseMalformed) {
+                // The response code could not be read.
+                LOGGER.debug("Could not retrieve data. Expectation failed. [url=({})]", address);
+                throw new HttpClientErrorException(HttpStatus.EXPECTATION_FAILED);
+            } else {
+                // This function should never be thrown.
+                LOGGER.warn("Could not retrieve data. Something else went wrong. [url=({})]", address);
+                throw new NotImplementedException("Unsupported return value " +
+                        "from getResponseCode.");
+            }
+        } catch (IOException exception) {
+            // Catch all the HTTP, IOExceptions.
+            LOGGER.warn("Failed to send the http get request. [url=({})]", address);
+            throw new RuntimeException("Failed to send the http get request.", exception);
+        }
+    }
+
+
+    /**
+     * Sends a GET request with basic authentication to an external HTTP endpoint.
+     *
+     * @param address the URL.
+     * @param username The username.
+     * @param password The password.
+     * @return The HTTP response when HTTP code is OK (200).
+     * @throws URISyntaxException if the input address is not a valid URI.
+     * @throws RuntimeException if an error occurred when connecting or processing the HTTP
+     *                               request.
+     */
+    public String sendHttpGetRequestWithBasicAuth(String address, String username,
+        String password) throws URISyntaxException, RuntimeException {
+        String credential = Credentials.basic(username, password);
+        OkHttpClient client = new OkHttpClient();
+        try {
+            Request request = new Request.Builder()
+                .url(address)
+                .header("Authorization", credential)
+                .build();
+
+            Response response = client.newCall(request).execute();
+            if (response.code() < 200 || response.code() >= 300) {
+                response.close();
+                // Not the expected response code.
+                LOGGER.debug("Could not retrieve data. Expectation failed. [url=({})]", address);
+                throw new HttpClientErrorException(HttpStatus.EXPECTATION_FAILED);
+            } else {
+                return Objects.requireNonNull(response.body()).string();
+            }
+        } catch (IOException exception) {
+            // Catch all the HTTP, IOExceptions.
+            LOGGER.warn("Failed to send the http get request. [url=({})]", address);
+            throw new RuntimeException("Failed to send the http get request.", exception);
+        }
+                
+    }
+
+
+}
