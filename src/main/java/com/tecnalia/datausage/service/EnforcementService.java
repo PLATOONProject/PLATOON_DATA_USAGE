@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +54,10 @@ public class EnforcementService {
     PolicyHandler policyHandler;
 
     public ResponseEntity<Object> enforce(IdsUseObject body) {
-        //Get contracts from ContractAgreement table applied to this providerURI, consumerUri
+        //Get contracts from ContractAgreement table applied to this providerURI & consumerUri
         Iterable<ContractStore> contractList = this.contractRepository.findAllByProviderIdAndConsumerId(body.getProviderUri(), body.getConsumerUri());
-        //Get contracts which start-end dates are valid according to current date, and get the most recent Contract
-        ContractStore validContractStore = getValidContracts(contractList);
+        //Get contracts that apply to targetUri and which start-end dates are valid according to current date, and get the most recent Contract
+        ContractStore validContractStore = getValidContracts(contractList, body.getTargetDataUri());
         if(validContractStore == null)
             return new ResponseEntity<>("No valid contracts found", HttpStatus.BAD_REQUEST);
         String contractTxt = validContractStore.getContractAsString();
@@ -111,23 +112,34 @@ public class EnforcementService {
         }
     }
     
-    ContractStore getValidContracts(Iterable<ContractStore> contractList) {
-        //Get contracts which start-end dates are valid according to current date, and get the most recent Contract
+    ContractStore getValidContracts(Iterable<ContractStore> contractList, String targetDataUri) {
+        //Get contracts that apply to targetUri and which start-end dates are valid according to current date, and get the most recent Contract
         ContractStore validContractStore = null;
         Date latestContractDate = null;
         for (ContractStore contractStore: contractList) {
+            //Firstly check if conract applies to targetDataUri
+            Optional<RuleStore> bCheckExistsRule = this.ruleRepository.findByContractUuidAndTargetId(contractStore.getContractUuid(), targetDataUri);
+            if(!bCheckExistsRule.isPresent())
+                //If contract not applies to targetDataUri, do not consider it
+                continue;
             String contractTxt = contractStore.getContractAsString();
             Serializer serializer = new Serializer();
             try {
                 Contract contract = serializer.deserialize(contractTxt, Contract.class);
                 Date contractStart = contract.getContractStart().toGregorianCalendar().getTime();
-                Date contractEnd = contract.getContractEnd().toGregorianCalendar().getTime();
+                Date contractEnd = null;
+                XMLGregorianCalendar contractEndGregCal = contract.getContractEnd();
+                if(contractEndGregCal != null) {
+                    contractEnd = contractEndGregCal.toGregorianCalendar().getTime();
+                }
                 Date contractDate = contract.getContractDate().toGregorianCalendar().getTime();
                 Date date = new Date();
-                if (date.after(contractStart) && date.before(contractEnd)) {
+                if (date.after(contractStart) && 
+                        ((contractEnd==null) || (contractEnd != null && date.before(contractEnd)))) {
                     if((latestContractDate == null) || 
                             ((latestContractDate != null) && (contractDate.after(latestContractDate)))){
                         validContractStore = contractStore;
+                        latestContractDate = contractDate;
                     }
                 } 
             } catch (Exception e) {

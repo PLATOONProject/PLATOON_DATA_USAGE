@@ -23,5 +23,6 @@ public interface RuleRepository extends JpaRepository<RuleStore, String> {
     List<RuleStore> deleteByContractId(String policyId);
     List<RuleStore> deleteByContractUuid(String contracUuid);
     Iterable<RuleStore> findAllByContractUuidAndTargetId(String contractUuid, String targetId);
+    Optional<RuleStore> findByContractUuidAndTargetId(String contractUuid, String targetId);
     
 }
