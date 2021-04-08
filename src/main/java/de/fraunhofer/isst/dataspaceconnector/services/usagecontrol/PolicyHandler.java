@@ -195,7 +195,14 @@ public class PolicyHandler {
          */
         USAGE_NOTIFICATION("USAGE_NOTIFICATION"),
 
+        /**
+         * Type: Role based: https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/RolebasedAgreementTemplates/ROLEBASED_AGREEMENT_TEMPLATE.jsonld
+         */
         ROLE_RESTRICTED_USAGE("ROLE_RESTRICTED_USAGE"),
+        
+        /**
+         * Type: Purpose restricted: https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/PurposeRestrictedUsageTemplates/PURPOSE_RESTRICTED_USAGE_AGREEMENT_TEMPLATE.jsonld
+         */
         PURPOSE_RESTRICTED_USAGE("PURPOSE_RESTRICTED_USAGE");
 
         private final String pattern;
