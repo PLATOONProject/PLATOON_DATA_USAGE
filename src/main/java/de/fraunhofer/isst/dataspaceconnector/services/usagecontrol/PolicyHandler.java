@@ -58,12 +58,12 @@ public class PolicyHandler {
             ArrayList<? extends Constraint> constraints = permission.getConstraint();
             ArrayList<? extends Duty> postDuties = permission.getPostDuty();
 
+            Action ruleAction = permission.getAction().get(0);
+            if (ruleAction != Action.USE) {
+                throw new UnsupportedPatternException(
+                    "The recognized policy pattern is not supported by this connector.");
+            }
             if (constraints != null && constraints.get(0) != null) {
-                Action action = postDuties.get(0).getAction().get(0);
-                if (action != Action.USE) {
-                    throw new UnsupportedPatternException(
-                        "The recognized policy pattern is not supported by this connector.");
-                }
                 if (constraints.size() > 1) {
                     return Pattern.USAGE_DURING_INTERVAL;
                 } else {
