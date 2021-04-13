@@ -31,11 +31,11 @@ import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-04-07T13:01:37.436Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-04-13T10:06:12.128Z[GMT]")
 @Validated
 public interface AdminApi {
 
-    @Operation(summary = "getAccess", description = "", tags={ "pip methods" })
+    @Operation(summary = "getAccess", description = "", tags={ "pip-controller" })
     @ApiResponses(value = { 
         @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
         

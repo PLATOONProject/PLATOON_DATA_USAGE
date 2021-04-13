@@ -26,12 +26,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * This class provides access permission information for the
  * {@link de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyHandler} depending on the policy content.
  */
 @Component
+
 public class PolicyVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyVerifier.class);

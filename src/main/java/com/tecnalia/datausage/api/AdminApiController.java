@@ -2,7 +2,6 @@ package com.tecnalia.datausage.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tecnalia.datausage.service.AdminService;
-import com.tecnalia.datausage.service.PolicyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,23 +33,21 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-04-07T13:01:37.436Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-04-13T10:06:12.128Z[GMT]")
 @RestController
 public class AdminApiController implements AdminApi {
-    
-    
-    
+
     @Autowired
     private final AdminService adminService;
 
     private static final Logger log = LoggerFactory.getLogger(AdminApiController.class);
 
-  /*  private final ObjectMapper objectMapper;
+   /* private final ObjectMapper objectMapper;
 
-    private final HttpServletRequest request;*/
+    private final HttpServletRequest request;
 
-  /*  @org.springframework.beans.factory.annotation.Autowired
-    public AdminApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public AdminApiController_1(ObjectMapper objectMapper, HttpServletRequest request) {
         this.objectMapper = objectMapper;
         this.request = request;
     }
@@ -60,15 +57,9 @@ public class AdminApiController implements AdminApi {
         this.adminService = adminService;
        
     }
-    
-    
+
     public ResponseEntity<String> getAccess(@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consumerUri", required = true) String consumerUri,@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "targetUri", required = true) String targetUri) {
-      
-        
-        return adminService.getAccess(consumerUri,targetUri);
-        
-        
-        /*  String accept = request.getHeader("Accept");
+      /*  String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<String>(objectMapper.readValue("\"\"", String.class), HttpStatus.NOT_IMPLEMENTED);
@@ -79,8 +70,8 @@ public class AdminApiController implements AdminApi {
         }
 
         return new ResponseEntity<String>(HttpStatus.NOT_IMPLEMENTED);*/
-      
-      
+      return adminService.getAccess(consumerUri,targetUri);
+        
     }
 
 }

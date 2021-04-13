@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.tecnalia.datausage.model.ContractStore;
 import com.tecnalia.datausage.model.RuleStore;
+import com.tecnalia.datausage.repository.AccessRepository;
 import com.tecnalia.datausage.repository.ContractRepository;
 
 
@@ -46,9 +47,9 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 //@ComponentScan(basePackages = { "io.swagger.configuration","de.fraunhofer.isst.ids.framework.configuration.SerializerProvider"})
 @Service
 //@Component
-public class PolicyService {
+public class ContractAgreementService {
     
-     private static final Logger log = LoggerFactory.getLogger(PolicyService.class);
+     private static final Logger log = LoggerFactory.getLogger(ContractAgreementService.class);
    
     @Autowired
     private  ContractRepository contractRepository;
@@ -58,7 +59,7 @@ public class PolicyService {
 
     
   @Autowired
-    public PolicyService(ContractRepository contractRepository,RuleRepository ruleRepository) throws IllegalArgumentException {
+    public ContractAgreementService(ContractRepository contractRepository,RuleRepository ruleRepository) throws IllegalArgumentException {
   // public PolicyService(OdrlPolicyRepo repository) throws IllegalArgumentException {
         
         if (contractRepository == null)
@@ -77,17 +78,10 @@ public class PolicyService {
 
          
         try{
-            log.info("addOrUpdate:::entra aqui");            
-            
-            log.info("addOrUpdate:::entra aqui 222");
+         
             Serializer serializer = new Serializer();
             Contract contract = serializer.deserialize(policy, Contract.class);
           
-            log.info("addOrUpdate:::"+contract.toString());
-
-
-            log.info("addOrUpdate:::"+contract.getId().toString());
-            
             Optional<ContractStore> bCheckExistsContract = this.contractRepository.findByContractId(contract.getId().toString());
             ContractStore contractStore;
             UUID contractUuid = null;
@@ -199,6 +193,8 @@ public class PolicyService {
         try{  
          
              
+            
+      
             
             Optional<ContractStore> bCheckExistsContract = this.contractRepository.findByContractUuid(contractUuid);
 
