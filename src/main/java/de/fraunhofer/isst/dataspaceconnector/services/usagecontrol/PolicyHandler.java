@@ -118,10 +118,6 @@ public class PolicyHandler {
                 return policyVerifier.inhibitAccess();
             case USAGE_DURING_INTERVAL:
                 return policyVerifier.checkInterval(permissionList);
-            case ROLE_RESTRICTED_USAGE:
-                return policyVerifier.checkRole(permissionList, consumerURI);
-            case PURPOSE_RESTRICTED_USAGE:
-                return policyVerifier.checkPurpose(permissionList, consumerURI);
             default:
                 return true;
         }
@@ -159,6 +155,10 @@ public class PolicyHandler {
                 return policyVerifier.logAccess();
             case N_TIMES_USAGE:
                 return policyVerifier.checkFrequency(permissionList, targetId, consumerURI);
+            case ROLE_RESTRICTED_USAGE:
+                return policyVerifier.checkRole(permissionList, consumerURI);
+            case PURPOSE_RESTRICTED_USAGE:
+                return policyVerifier.checkPurpose(permissionList, consumerURI);
             default:
                 return true;
         }
