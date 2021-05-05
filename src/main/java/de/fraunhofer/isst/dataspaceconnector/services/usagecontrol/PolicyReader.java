@@ -1,5 +1,6 @@
 package de.fraunhofer.isst.dataspaceconnector.services.usagecontrol;
 
+import de.fraunhofer.iais.eis.AbstractConstraint;
 import de.fraunhofer.iais.eis.BinaryOperator;
 import de.fraunhofer.iais.eis.Constraint;
 import de.fraunhofer.iais.eis.Rule;
@@ -13,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class reads the content of the policy rules and returns required information to the {@link
@@ -28,7 +30,7 @@ public class PolicyReader {
      * @return the number of allowed accesses.
      */
     public Integer getMaxAccess(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
 
         int value = Integer.parseInt(constraint.getRightOperand().getValue());
         switch (constraint.getOperator()) {
@@ -51,7 +53,8 @@ public class PolicyReader {
     public TimeInterval getTimeInterval(Rule rule) {
         TimeInterval timeInterval = new TimeInterval();
 
-        for (Constraint constraint : rule.getConstraint()) {
+        for (AbstractConstraint absConstraint : rule.getConstraint()){
+            Constraint constraint = (Constraint)absConstraint;
             if (constraint.getOperator() == BinaryOperator.AFTER) {
                 timeInterval.setStart(constraint.getRightOperand().getValue());
             } else if (constraint.getOperator() == BinaryOperator.BEFORE) {
@@ -68,7 +71,7 @@ public class PolicyReader {
      * @return the endpoint value.
      */
     public String getEndpoint(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         return constraint.getRightOperand().getValue();
     }
 
@@ -79,7 +82,7 @@ public class PolicyReader {
      * @return the pip endpoint value.
      */
     public URI getPipEndpoint(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         return constraint.getPipEndpoint();
     }
 
@@ -91,7 +94,7 @@ public class PolicyReader {
      * @throws java.text.ParseException if the date cannot be parsed.
      */
     public Date getDate(Rule rule) throws ParseException {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         String date = constraint.getRightOperand().getValue();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -107,7 +110,7 @@ public class PolicyReader {
      * @throws javax.xml.datatype.DatatypeConfigurationException if the duration cannot be parsed.
      */
     public Duration getDuration(Rule rule) throws DatatypeConfigurationException {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         if (constraint.getRightOperand().getType().equals("xsd:duration")) {
             String duration = constraint.getRightOperand().getValue();
             return DatatypeFactory.newInstance().newDuration(duration);
@@ -124,7 +127,7 @@ public class PolicyReader {
      * @return the URI of the connector
      */
     public URI getAllowedConnector(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         String allowedConnectorAsString = constraint.getRightOperand().getValue();
         return URI.create(allowedConnectorAsString);
     }
@@ -137,7 +140,7 @@ public class PolicyReader {
      * @return the URI of the Role
      */
     public URI getAllowedRole(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         URI allowedRole = constraint.getRightOperandReference();
         return allowedRole;
     }
@@ -149,7 +152,7 @@ public class PolicyReader {
      * @return the URI of the Purpose
      */
     public URI getAllowedPurpose(Rule rule) {
-        Constraint constraint = rule.getConstraint().get(0);
+        Constraint constraint = (Constraint)rule.getConstraint().get(0);
         URI allowedPurpose = constraint.getRightOperandReference();
         return allowedPurpose;
     }

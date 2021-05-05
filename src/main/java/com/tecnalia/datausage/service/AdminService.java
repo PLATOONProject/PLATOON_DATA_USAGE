@@ -36,7 +36,7 @@ import com.tecnalia.datausage.repository.RuleRepository;
 import java.io.IOException;
 import java.util.UUID;
 import javax.transaction.Transactional;
-import org.eclipse.rdf4j.rio.RDFFormat;
+
 
 /**
  *

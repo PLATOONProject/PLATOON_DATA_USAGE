@@ -79,12 +79,17 @@ public class EnforcementService {
             String ruleTxt = ruleStore.getRuleContent();
             Serializer serializer = new Serializer();
             try {
-                Rule rule = serializer.deserialize(ruleTxt, Rule.class);
-                String ruleType = getRuleType(rule);
-                if(ruleType.compareToIgnoreCase("Permission") == 0)
-                    permissionList.add((Permission)rule);
-                else if(ruleType.compareToIgnoreCase("Prohibition") == 0)
+                //Rule rule = serializer.deserialize(ruleTxt, Rule.class);
+                //String ruleType = getRuleType(rule);
+                String ruleType = getRuleType(ruleTxt);
+                if(ruleType.compareToIgnoreCase("Permission") == 0) {
+                    Permission rule = serializer.deserialize(ruleTxt, Permission.class);
+                    permissionList.add(rule);
+                }
+                else if(ruleType.compareToIgnoreCase("Prohibition") == 0) {
+                    Prohibition rule = serializer.deserialize(ruleTxt, Prohibition.class);
                     prohibitionList.add((Prohibition)rule);
+                }
              } catch (Exception e) {
                 return new ResponseEntity<>("Invalid rule format", HttpStatus.BAD_REQUEST);
             }
@@ -148,8 +153,8 @@ public class EnforcementService {
         return validContractStore;
     }
     
-    String getRuleType(Rule rule) {
-        String ruleType = "";
+    String getRuleTypeOLd(Rule rule) {
+        String ruleType = "";        
         List<TypedLiteral> labelsList = rule.getLabel();
         for (TypedLiteral lit: labelsList) {
             String val = lit.getValue();
@@ -158,10 +163,28 @@ public class EnforcementService {
                 break;
             }
         }
-        
         return ruleType;
     }
     
+    String getRuleType(String ruleTxt) {
+        String ruleType = "";
+        Serializer serializer = new Serializer();
+        try  {
+            Permission rule = serializer.deserialize(ruleTxt, Permission.class);
+            ruleType = "Permission";
+        }catch ( Exception ex) {
+            
+        }
+            
+        try  {
+            Prohibition rule = serializer.deserialize(ruleTxt, Prohibition.class);
+            ruleType = "Prohibition";
+        }catch ( Exception ex) {
+            
+        }
+        
+        return ruleType;
+    }
     @Transactional
     void incrementAccessFrequency(String targetDataUri, String consumerUri) {
         //Increment by 1 the access frequency

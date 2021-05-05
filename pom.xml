@@ -15,9 +15,9 @@
         <springfox-version>3.0.0</springfox-version>
         <okhttp.version>4.2.2</okhttp.version>
         <swagger-annotations.version>1.5.20</swagger-annotations.version>
-        <de.fraunhofer.iais.eis.ids.infomodel.validator.version>4.0.0</de.fraunhofer.iais.eis.ids.infomodel.validator.version>
-        <de.fraunhofer.iais.eis.ids.infomodel.version>4.0.0</de.fraunhofer.iais.eis.ids.infomodel.version>
-        <de.fraunhofer.iais.eis.ids.infomodel.serializer.version>4.0.0</de.fraunhofer.iais.eis.ids.infomodel.serializer.version>
+        <de.fraunhofer.iais.eis.ids.infomodel.validator.version>4.0.6</de.fraunhofer.iais.eis.ids.infomodel.validator.version>
+        <de.fraunhofer.iais.eis.ids.infomodel.version>4.0.6</de.fraunhofer.iais.eis.ids.infomodel.version>
+        <de.fraunhofer.iais.eis.ids.infomodel.serializer.version>4.0.6</de.fraunhofer.iais.eis.ids.infomodel.serializer.version>
     </properties>
     <parent>
         <groupId>org.springframework.boot</groupId>

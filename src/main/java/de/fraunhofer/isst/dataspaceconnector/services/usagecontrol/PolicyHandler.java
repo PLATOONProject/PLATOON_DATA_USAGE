@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class provides policy pattern recognition and calls the {@link
@@ -55,8 +56,8 @@ public class PolicyHandler {
             Permission permission = permissionList.get(0);
             //Action action = permission.getAction().get(0);
             //if(action.)
-            ArrayList<? extends Constraint> constraints = permission.getConstraint();
-            ArrayList<? extends Duty> postDuties = permission.getPostDuty();
+            List<AbstractConstraint> constraints = permission.getConstraint();
+            List<Duty> postDuties = permission.getPostDuty();
 
             Action ruleAction = permission.getAction().get(0);
             if (ruleAction != Action.USE) {
@@ -67,16 +68,16 @@ public class PolicyHandler {
                 if (constraints.size() > 1) {
                     return Pattern.USAGE_DURING_INTERVAL;
                 } else {
-                    LeftOperand leftOperand = constraints.get(0).getLeftOperand();
+                    LeftOperand leftOperand = ((Constraint)constraints.get(0)).getLeftOperand();
                     if (leftOperand == LeftOperand.COUNT) {
                         return Pattern.N_TIMES_USAGE;
                     } else if (leftOperand == LeftOperand.ELAPSED_TIME) {
                         return Pattern.DURATION_USAGE;
                     } else if ((leftOperand == LeftOperand.USER )
-                            && (constraints.get(0).getOperator() == BinaryOperator.HAS_MEMBERSHIP))  {
+                            && (((Constraint)constraints.get(0)).getOperator() == BinaryOperator.HAS_MEMBERSHIP))  {
                         return Pattern.ROLE_RESTRICTED_USAGE;
                     } else if ((leftOperand == LeftOperand.PURPOSE )
-                            && (constraints.get(0).getOperator() == BinaryOperator.SAME_AS))  {
+                            && (((Constraint)constraints.get(0)).getOperator() == BinaryOperator.SAME_AS))  {
                         return Pattern.PURPOSE_RESTRICTED_USAGE;
                     } else {
                         throw new UnsupportedPatternException(
