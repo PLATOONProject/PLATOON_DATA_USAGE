@@ -1,6 +1,7 @@
 package de.fraunhofer.isst.dataspaceconnector.services.usagecontrol;
 
 import de.fraunhofer.iais.eis.*;
+import de.fraunhofer.iais.eis.util.TypedLiteral;
 import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.UnsupportedPatternException;
 import java.net.URI;
 import org.slf4j.Logger;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class provides policy pattern recognition and calls the {@link
@@ -64,6 +67,10 @@ public class PolicyHandler {
                 throw new UnsupportedPatternException(
                     "The recognized policy pattern is not supported by this connector.");
             }
+            Map <String, Object> propsMap = permission.getProperties();
+            Object persDataCat = propsMap.get("http://www.w3.org/ns/dpv#hasPersonalDataCategory");
+            if(persDataCat != null)
+                return Pattern.PERSONAL_DATA;
             if (constraints != null && constraints.get(0) != null) {
                 if (constraints.size() > 1) {
                     return Pattern.USAGE_DURING_INTERVAL;
@@ -160,6 +167,8 @@ public class PolicyHandler {
                 return policyVerifier.checkRole(permissionList, consumerURI);
             case PURPOSE_RESTRICTED_USAGE:
                 return policyVerifier.checkPurpose(permissionList, consumerURI);
+            case PERSONAL_DATA:
+                return true;
             default:
                 return true;
         }
@@ -204,7 +213,12 @@ public class PolicyHandler {
         /**
          * Type: Purpose restricted: https://github.com/International-Data-Spaces-Association/InformationModel/blob/master/examples/contracts-and-usage-policy/templates/PurposeRestrictedUsageTemplates/PURPOSE_RESTRICTED_USAGE_AGREEMENT_TEMPLATE.jsonld
          */
-        PURPOSE_RESTRICTED_USAGE("PURPOSE_RESTRICTED_USAGE");
+        PURPOSE_RESTRICTED_USAGE("PURPOSE_RESTRICTED_USAGE"),
+
+        /**
+         * Type: Contains Personal Data
+         */
+        PERSONAL_DATA("PERSONAL_DATA");
 
         private final String pattern;
 

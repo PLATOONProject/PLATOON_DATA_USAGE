@@ -7,10 +7,15 @@ package com.tecnalia.datausage.utils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Objects;
 import okhttp3.Credentials;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
@@ -114,6 +119,64 @@ public class HttpUtils {
             throw new RuntimeException("Failed to send the http get request.", exception);
         }
                 
+    }
+
+    /**
+     * Sends a POST request to an external HTTP endpoint
+     *
+     * @param address the URL.
+     * @return the HTTP response if HTTP code is OK (200).
+     * @throws URISyntaxException if the input address is not a valid URI.
+     * @throws RuntimeException if an error occurred when connecting or processing the HTTP
+     *                               request.
+     */
+    public String sendHttpPostRequest(String address,  Map<String,String>params, String jsonData) throws
+        RuntimeException, URISyntaxException {
+        
+        OkHttpClient client = new OkHttpClient();
+        try {
+            //TODO: Poner bien los parametros
+            HttpUrl.Builder httpBuilder = HttpUrl.parse(address).newBuilder();
+            if (params != null) {
+               for(Map.Entry<String, String> param : params.entrySet()) {
+                   httpBuilder.addQueryParameter(param.getKey(),param.getValue());
+               }
+            }            
+            RequestBody body = RequestBody.create(jsonData, MediaType.parse("application/json"));
+            Request request = new Request.Builder()
+                .url(httpBuilder.build())
+                .post(body)
+                .build();
+ 
+            Response response = client.newCall(request).execute();
+
+            final var responseCodeOk = 200;
+            final var responseCodeUnauthorized = 401;
+            final var responseMalformed = -1;
+
+            final var responseCode = response.code();
+
+            if(responseCode == responseCodeOk){
+                return Objects.requireNonNull(response.body()).string();
+            } else if (responseCode == responseCodeUnauthorized) {
+                // The request is not authorized.
+                LOGGER.debug("Could not retrieve data. Unauthorized access. [url=({})]", address);
+                throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+            } else if (responseCode == responseMalformed) {
+                // The response code could not be read.
+                LOGGER.debug("Could not retrieve data. Expectation failed. [url=({})]", address);
+                throw new HttpClientErrorException(HttpStatus.EXPECTATION_FAILED);
+            } else {
+                // This function should never be thrown.
+                LOGGER.warn("Could not retrieve data. Something else went wrong. [url=({})]", address);
+                throw new NotImplementedException("Unsupported return value " +
+                        "from getResponseCode.");
+            }
+        } catch (IOException exception) {
+            // Catch all the HTTP, IOExceptions.
+            LOGGER.warn("Failed to send the http get request. [url=({})]", address);
+            throw new RuntimeException("Failed to send the http get request.", exception);
+        }
     }
 
 

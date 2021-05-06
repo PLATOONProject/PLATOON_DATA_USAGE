@@ -12,6 +12,7 @@ import com.tecnalia.datausage.model.RuleStore;
 import com.tecnalia.datausage.repository.AccessRepository;
 import com.tecnalia.datausage.repository.ContractRepository;
 import com.tecnalia.datausage.repository.RuleRepository;
+import com.tecnalia.datausage.usagecontrol.PersonalDataEnforcement;
 import de.fraunhofer.iais.eis.Contract;
 import de.fraunhofer.iais.eis.Permission;
 import de.fraunhofer.iais.eis.Prohibition;
@@ -20,6 +21,7 @@ import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
 import de.fraunhofer.iais.eis.util.TypedLiteral;
 import de.fraunhofer.isst.dataspaceconnector.exceptions.contract.UnsupportedPatternException;
 import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyHandler;
+import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyHandler.Pattern;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,6 +54,9 @@ public class EnforcementService {
 
     @Autowired
     PolicyHandler policyHandler;
+
+    @Autowired
+    PersonalDataEnforcement personalDataEnforcement;
 
     public ResponseEntity<Object> enforce(IdsUseObject body) {
         //Get contracts from ContractAgreement table applied to this providerURI & consumerUri
@@ -97,9 +102,18 @@ public class EnforcementService {
         
         try {
             boolean allowAccess = false;
+            Object filteredDataObject = body.getDataObject();
             if(body.isConsuming()) {
                //For each rule, apply enforcement
                allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri(), body.getConsumerUri());
+               if(policyHandler.getPattern(permissionList, prohibitionList)== Pattern.PERSONAL_DATA) {
+                  filteredDataObject = personalDataEnforcement.enforce(
+                          permissionList, 
+                          body.getProviderUri(),
+                          body.getConsumerUri(),
+                          body.getTargetDataUri(),
+                          body.getDataObject());
+               }
                if(allowAccess)
                    incrementAccessFrequency(body.getTargetDataUri(), body.getConsumerUri());
             } else {
@@ -108,7 +122,7 @@ public class EnforcementService {
             }
             
             if(allowAccess) {
-                return new ResponseEntity<>(body.getDataObject(), HttpStatus.OK); 
+                return new ResponseEntity<>(filteredDataObject, HttpStatus.OK); 
             } else {
                 return new ResponseEntity<>("PDP decided to inhibit the usage: Event is not allowed according to policy", HttpStatus.FORBIDDEN); 
             }
