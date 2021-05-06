@@ -58,7 +58,7 @@ public class EnforcementService {
     @Autowired
     PersonalDataEnforcement personalDataEnforcement;
 
-    public ResponseEntity<Object> enforce(IdsUseObject body) {
+    public ResponseEntity<Object> enforce(String targetDataUri,String providerUri,String consumerUri,boolean consuming,IdsUseObject body) {
         //Get contracts from ContractAgreement table applied to this providerURI & consumerUri
         Iterable<ContractStore> contractList = this.contractRepository.findAllByProviderIdAndConsumerId(body.getProviderUri(), body.getConsumerUri());
         //Get contracts that apply to targetUri and which start-end dates are valid according to current date, and get the most recent Contract
