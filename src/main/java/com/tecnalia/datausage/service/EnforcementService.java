@@ -58,7 +58,7 @@ public class EnforcementService {
     @Autowired
     PersonalDataEnforcement personalDataEnforcement;
 
-    public ResponseEntity<Object> enforce(String targetDataUri,String providerUri,String consumerUri,boolean consuming,IdsUseObject body) {
+    public ResponseEntity<Object> enforce(String targetDataUri,String providerUri,String consumerUri,boolean consuming,String body) {
         //Get contracts from ContractAgreement table applied to this providerURI & consumerUri
         Iterable<ContractStore> contractList = this.contractRepository.findAllByProviderIdAndConsumerId(providerUri, consumerUri);
         //Get contracts that apply to targetUri and which start-end dates are valid according to current date, and get the most recent Contract
@@ -102,7 +102,7 @@ public class EnforcementService {
         
         try {
             boolean allowAccess = false;
-            Object filteredDataObject = body.getDataObject();
+            String filteredDataObject = body;
             if(consuming) {
                //For each rule, apply enforcement
                allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, targetDataUri,consumerUri);
@@ -112,7 +112,7 @@ public class EnforcementService {
                           providerUri,
                           consumerUri,
                           targetDataUri,
-                          body.getDataObject());
+                          body);
                }
                if(allowAccess)
                    incrementAccessFrequency(targetDataUri, consumerUri);

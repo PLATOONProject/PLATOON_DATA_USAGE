@@ -53,13 +53,13 @@ public class PersonalDataEnforcement {
     }
 
     public String enforce (ArrayList<Permission> permissionList, String providerURI,
-            String consumerURI, String targetDataUri, Object dataObject) {
+            String consumerURI, String targetDataUri, String dataObject) {
         
         JSONArray filteredDataObject = new JSONArray();
         
         String consumerPurpose = getConsumerPurpose(permissionList, consumerURI);
 
-        JSONArray dataObjectsList = new JSONArray((String)dataObject);
+        JSONArray dataObjectsList = new JSONArray(dataObject);
         for(Object onePersonDataObject: dataObjectsList) {
             JSONObject onePersonDataObjectJson = (JSONObject)onePersonDataObject;
             String userId = getUserId(permissionList, onePersonDataObjectJson);
