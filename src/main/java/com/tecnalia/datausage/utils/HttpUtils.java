@@ -135,7 +135,6 @@ public class HttpUtils {
         
         OkHttpClient client = new OkHttpClient();
         try {
-            //TODO: Poner bien los parametros
             HttpUrl.Builder httpBuilder = HttpUrl.parse(address).newBuilder();
             if (params != null) {
                for(Map.Entry<String, String> param : params.entrySet()) {

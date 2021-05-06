@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,10 +32,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PersonalDataEnforcement {
-
+    @Value("${cape.enforce.usage.url}")
+    private String enforceConsentsUrl = "";
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalDataEnforcement.class);
     
-     private final PolicyReader policyReader;
+    private final PolicyReader policyReader;
     private final HttpUtils httpUtils;
 
     public PersonalDataEnforcement(PolicyReader policyReader, HttpUtils httpUtils)
@@ -103,8 +106,6 @@ public class PersonalDataEnforcement {
                             JSONObject onePersonDataObjectJson) {
         JSONObject filteredOnePersonDataObjectJson = new JSONObject();
         //TODO- Invoke CaPe API to filter one person's data
-        //TODO: Coger URL de CaPe del properties
-        String address = "http://localhost:8085/services/consents/enforceusageRules";
         Map<String,String>params = new HashMap<String, String>();
         params.put("sinkServiceId:", consumerURI);
         params.put("sourceServiceId::", providerURI);
@@ -112,11 +113,13 @@ public class PersonalDataEnforcement {
         params.put("datasetId::", targetDataUri);
         params.put("purposeCategory::", consumerPurpose);
         try {
-            String filteredOnePersonDataObjectAsString = httpUtils.sendHttpPostRequest(address, params, onePersonDataObjectJson.toString());
+            String filteredOnePersonDataObjectAsString = httpUtils.sendHttpPostRequest(enforceConsentsUrl, params, onePersonDataObjectJson.toString());
         } catch (URISyntaxException | RuntimeException e) {
         }
         
+        //TODO- Quitar esta línea y dejar lo que devuelve CaPe
         filteredOnePersonDataObjectJson = onePersonDataObjectJson;
+
         return filteredOnePersonDataObjectJson;
     }
 }

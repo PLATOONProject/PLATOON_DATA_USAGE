@@ -60,9 +60,9 @@ public class EnforcementService {
 
     public ResponseEntity<Object> enforce(String targetDataUri,String providerUri,String consumerUri,boolean consuming,IdsUseObject body) {
         //Get contracts from ContractAgreement table applied to this providerURI & consumerUri
-        Iterable<ContractStore> contractList = this.contractRepository.findAllByProviderIdAndConsumerId(body.getProviderUri(), body.getConsumerUri());
+        Iterable<ContractStore> contractList = this.contractRepository.findAllByProviderIdAndConsumerId(providerUri, consumerUri);
         //Get contracts that apply to targetUri and which start-end dates are valid according to current date, and get the most recent Contract
-        ContractStore validContractStore = getValidContracts(contractList, body.getTargetDataUri());
+        ContractStore validContractStore = getValidContracts(contractList, targetDataUri);
         if(validContractStore == null)
             return new ResponseEntity<>("No valid contracts found", HttpStatus.BAD_REQUEST);
         String contractTxt = validContractStore.getContractAsString();
@@ -76,7 +76,7 @@ public class EnforcementService {
         }
         
         //Get rules from rule table applied to the contract, targetDataUri
-        Iterable<RuleStore> ruleList = this.ruleRepository.findAllByContractUuidAndTargetId(validContractStore.getContractUuid(), body.getTargetDataUri());
+        Iterable<RuleStore> ruleList = this.ruleRepository.findAllByContractUuidAndTargetId(validContractStore.getContractUuid(), targetDataUri);
         //Classify Rules into Permissions and Prohibitions
         ArrayList<Permission> permissionList = new ArrayList<>();
         ArrayList<Prohibition> prohibitionList = new ArrayList<>();
@@ -103,22 +103,22 @@ public class EnforcementService {
         try {
             boolean allowAccess = false;
             Object filteredDataObject = body.getDataObject();
-            if(body.isConsuming()) {
+            if(consuming) {
                //For each rule, apply enforcement
-               allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, body.getTargetDataUri(), body.getConsumerUri());
+               allowAccess = policyHandler.onDataAccess(permissionList, prohibitionList, validContractStart, targetDataUri,consumerUri);
                if(policyHandler.getPattern(permissionList, prohibitionList)== Pattern.PERSONAL_DATA) {
                   filteredDataObject = personalDataEnforcement.enforce(
                           permissionList, 
-                          body.getProviderUri(),
-                          body.getConsumerUri(),
-                          body.getTargetDataUri(),
+                          providerUri,
+                          consumerUri,
+                          targetDataUri,
                           body.getDataObject());
                }
                if(allowAccess)
-                   incrementAccessFrequency(body.getTargetDataUri(), body.getConsumerUri());
+                   incrementAccessFrequency(targetDataUri, consumerUri);
             } else {
                //For each rule, apply enforcement            
-               allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, body.getConsumerUri());
+               allowAccess = policyHandler.onDataProvision(permissionList, prohibitionList, consumerUri);
             }
             
             if(allowAccess) {
