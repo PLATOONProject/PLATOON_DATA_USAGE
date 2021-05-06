@@ -6,7 +6,7 @@
 package com.tecnalia.datausage.service;
 
 import com.tecnalia.datausage.model.AccessStore;
-import com.tecnalia.datausage.model.IdsUseObject;
+
 import com.tecnalia.datausage.model.ContractStore;
 import com.tecnalia.datausage.model.RuleStore;
 import com.tecnalia.datausage.repository.AccessRepository;
