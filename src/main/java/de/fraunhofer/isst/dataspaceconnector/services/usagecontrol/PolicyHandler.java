@@ -68,9 +68,13 @@ public class PolicyHandler {
                     "The recognized policy pattern is not supported by this connector.");
             }
             Map <String, Object> propsMap = permission.getProperties();
-            Object persDataCat = propsMap.get("http://www.w3.org/ns/dpv#hasPersonalDataCategory");
-            if(persDataCat != null)
-                return Pattern.PERSONAL_DATA;
+            if(propsMap != null) {
+                Object persDataCat = propsMap.get("http://www.w3.org/ns/dpv#hasPersonalDataCategory");
+                if(persDataCat != null) {
+                    return Pattern.PERSONAL_DATA;
+                }
+            }
+            
             if (constraints != null && constraints.get(0) != null) {
                 if (constraints.size() > 1) {
                     return Pattern.USAGE_DURING_INTERVAL;

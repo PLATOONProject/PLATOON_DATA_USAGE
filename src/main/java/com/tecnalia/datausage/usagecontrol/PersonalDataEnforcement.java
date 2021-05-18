@@ -9,6 +9,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.tecnalia.datausage.utils.HttpUtils;
 import de.fraunhofer.iais.eis.Permission;
+import de.fraunhofer.iais.eis.Rule;
 import de.fraunhofer.iais.eis.util.TypedLiteral;
 import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyReader;
 import java.io.UnsupportedEncodingException;
@@ -52,17 +53,36 @@ public class PersonalDataEnforcement {
         this.httpUtils = httpUtils;
     }
 
-    public String enforce (ArrayList<Permission> permissionList, String providerURI,
+    public String enforce (Permission permission, String providerURI,
             String consumerURI, String targetDataUri, String dataObject) {
         
         JSONArray filteredDataObject = new JSONArray();
         
-        String consumerPurpose = getConsumerPurpose(permissionList, consumerURI);
+        String consumerPurpose = getConsumerPurpose(permission, consumerURI);
 
         JSONArray dataObjectsList = new JSONArray(dataObject);
         for(Object onePersonDataObject: dataObjectsList) {
             JSONObject onePersonDataObjectJson = (JSONObject)onePersonDataObject;
-            String userId = getUserId(permissionList, onePersonDataObjectJson);
+            String userId = getUserId(permission, onePersonDataObjectJson);
+            JSONObject filteredOnePersonDataObjectJson = enforceConsents(consumerURI, providerURI,
+                            userId, targetDataUri, consumerPurpose, onePersonDataObjectJson);
+            filteredDataObject.put(filteredOnePersonDataObjectJson);           
+        }
+        
+        return filteredDataObject.toString();
+    }
+
+    public String enforceOld (Permission permission, String providerURI,
+            String consumerURI, String targetDataUri, String dataObject) {
+        
+        JSONArray filteredDataObject = new JSONArray();
+        
+        String consumerPurpose = getConsumerPurpose(permission, consumerURI);
+
+        JSONArray dataObjectsList = new JSONArray(dataObject);
+        for(Object onePersonDataObject: dataObjectsList) {
+            JSONObject onePersonDataObjectJson = (JSONObject)onePersonDataObject;
+            String userId = getUserId(permission, onePersonDataObjectJson);
             JSONObject filteredOnePersonDataObjectJson = enforceConsents(consumerURI, providerURI,
                             userId, targetDataUri, consumerPurpose, onePersonDataObjectJson);
             filteredDataObject.put(filteredOnePersonDataObjectJson);           
@@ -71,9 +91,9 @@ public class PersonalDataEnforcement {
         return filteredDataObject.toString();
     }
     
-    String getConsumerPurpose(ArrayList<Permission> permissionList, String consumerURI) {
+    String getConsumerPurpose(Permission permission, String consumerURI) {
         String consumerPurposeAsString = "";  
-        URI pip = policyReader.getPipEndpoint(permissionList.get(0).getPreDuty().get(0));
+        URI pip = policyReader.getPipEndpoint(permission.getPreDuty().get(0));
         
         try {
             String encodedConsumerUri =  URLEncoder.encode(consumerURI, StandardCharsets.UTF_8.toString());
@@ -86,10 +106,10 @@ public class PersonalDataEnforcement {
         return consumerPurposeAsString;
     }
     
-    String getUserId(ArrayList<Permission> permissionList, JSONObject onePersonDataObjectJson) {
+    String getUserId(Permission permission, JSONObject onePersonDataObjectJson) {
         String userId = "";  
         //Get the value of the jsonPath attribute
-        Map <String, Object> propsMap = permissionList.get(0).getPreDuty().get(0).getProperties();
+        Map <String, Object> propsMap = permission.getPreDuty().get(0).getProperties();
         TypedLiteral userIdPathLit = (TypedLiteral)propsMap.get("https://w3id.org/idsa/code/JsonPath");
         String userIdPath = userIdPathLit.getValue();
 
