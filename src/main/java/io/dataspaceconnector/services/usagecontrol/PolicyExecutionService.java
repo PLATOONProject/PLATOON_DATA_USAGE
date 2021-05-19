@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+//TECNALIA-ICT-OPTIMA: Comment out the methods, so that they do nothing.
 /**
  * Executes policy conditions. Refers to the ids policy enforcement point (PEP).
  */

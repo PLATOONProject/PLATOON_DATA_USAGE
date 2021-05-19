@@ -23,6 +23,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.Date;
 
+//TECNALIA-ICT-OPTIMA: Different class attributes: 
+// - consumerUri instead of issuerConnector
+// - created: ContractAgreement start date
+// - rules instead of agreement
 @AllArgsConstructor
 @Data
 @RequiredArgsConstructor

@@ -30,9 +30,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A {@link PolicyVerifier} implementation that checks whether data access should be allowed.
+ */
 @Component
 @Log4j2
 @RequiredArgsConstructor
+//TECNALIA-ICT-OPTIMA: Use <VerificationInput> instead of <Artifact>
 public final class DataAccessVerifier implements PolicyVerifier<VerificationInput> {
 
     /**
@@ -40,17 +44,23 @@ public final class DataAccessVerifier implements PolicyVerifier<VerificationInpu
      */
     private final @NonNull RuleValidator ruleValidator;
 
+    //TECNALIA-ICT-OPTIMA: Use <VerificationInput> instead of <Artifact>
     /**
-     * Policy check on data access on consumer side. Ignore if unknown patterns are allowed.
+     * Policy check on data access on consumer side.Ignore if unknown patterns are allowed.
      *
-     * @param target The requested element.
+     * @param target      The requested element.
+     * @param consumerUri The URI of the consumer connector.
+     * @param created     The start date of the ContractAgreement.
+     * @param rules       The ids rule list.
      * @throws PolicyRestrictionException If a policy restriction has been detected.
      */
     public void checkPolicy(final String target,
                             final String consumerUri,
                             final Date created,
                             final ArrayList<Rule> rules) throws PolicyRestrictionException {
+        //TECNALIA-ICT-OPTIMA: Use variable instead of the ConnectorConfigurator
         final var ignoreUnsupportedPatterns = false;
+        //TECNALIA-ICT-OPTIMA: Remove and add some Policy Patterns
         final var patternsToCheck = Arrays.asList(
                 PolicyPattern.PROVIDE_ACCESS,
                 PolicyPattern.USAGE_DURING_INTERVAL,
@@ -71,15 +81,16 @@ public final class DataAccessVerifier implements PolicyVerifier<VerificationInpu
         }
     }
 
+    //TECNALIA-ICT-OPTIMA: Use <VerificationInput> instead of <Artifact>
     /**
      * Checks the contract content for data access (on consumer side).
      *
      * @param patterns   List of patterns that should be enforced.
-     * @param artifactId The requested artifact.
-     * @param remoteId   The remote id of the requested artifact.
-     * @throws io.dataspaceconnector.exceptions.UnsupportedPatternException
-     *         If no suitable pattern could be found.
-     */
+     * @param target      The requested element.
+     * @param consumerUri The URI of the consumer connector.
+     * @param created     The start date of the ContractAgreement.
+     * @param rules       The ids rule list.
+    */
      public void checkForAccess(final List<PolicyPattern> patterns,
                                final String target, final String consumerUri, final Date created,
                                final ArrayList<Rule> rules)
@@ -95,6 +106,7 @@ public final class DataAccessVerifier implements PolicyVerifier<VerificationInpu
         }
     }
 
+    //TECNALIA-ICT-OPTIMA: Use <VerificationInput> instead of <Artifact>
     /**
      * {@inheritDoc}
      */

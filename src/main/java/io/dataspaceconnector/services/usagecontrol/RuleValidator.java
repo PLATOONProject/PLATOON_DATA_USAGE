@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.datatype.DatatypeConfigurationException;
 
+//TECNALIA-ICT-OPTIMA: Remove and add new methods.
 /**
  * This class provides policy pattern recognition and calls the {@link
  * PolicyInformationService} on data
@@ -58,17 +59,22 @@ public class RuleValidator {
      */
     private final @NonNull PolicyInformationService informationService;
 
-    /**
+    //TECNALIA-ICT-OPTIMA: Different input parameters: 
+    // - consumerUri instead of issuerConnector
+    // - created: ContractAgreement start date
+     /**
      * Validates the data access for a given rule.
      *
      * @param pattern         The recognized policy pattern.
      * @param rule            The ids rule.
      * @param target          The requested/accessed element.
-     * @param issuerConnector The issuer connector.
+     * @param consumerUri     The URI of the consumer connector.
+     * @param created         The start date of the ContractAgreement.
      * @throws PolicyRestrictionException If a policy restriction was detected.
      */
     void validatePolicy(final PolicyPattern pattern, final Rule rule, final String target,
                         final String consumerURI, final Date created) throws PolicyRestrictionException {
+        //TECNALIA-ICT-OPTIMA: Remove and add policy patterns.
         switch (pattern) {
             case PROVIDE_ACCESS:
                 break;
@@ -76,12 +82,14 @@ public class RuleValidator {
                 validateInterval(rule);
                 break;
             case DURATION_USAGE:
+                //TECNALIA-ICT-OPTIMA: Add created (ContractAgreement start date) input parameter
                 validateDuration(rule, target, created);
                 break;
             case USAGE_LOGGING:
                 executionService.logDataAccess(target);
                 break;
             case N_TIMES_USAGE:
+                //TECNALIA-ICT-OPTIMA: Add consumerURI input parameter
                 validateAccessNumber(rule, target, consumerURI);
                 break;
             case ROLE_RESTRICTED_USAGE:
@@ -129,11 +137,14 @@ public class RuleValidator {
         }
     }
 
+    //TECNALIA-ICT-OPTIMA: New input parameters: 
+    // - created: ContractAgreement start date
     /**
      * Adds a duration to a given date and checks if the duration has already been exceeded.
      *
-     * @param rule   The ids rule.
-     * @param target The accessed element.
+     * @param rule    The ids rule.
+     * @param target  The accessed element.
+     * @param created The start date of the ContractAgreement.
      * @throws PolicyRestrictionException If the policy could not be read or a restriction is
      *                                    detected.
      */
@@ -169,11 +180,14 @@ public class RuleValidator {
         }
     }
 
-    /**
+    //TECNALIA-ICT-OPTIMA: New input parameters: 
+    // - consumerURI: The URI of the consumer connector.
+     /**
      * Checks whether the maximum number of accesses has already been reached.
      *
-     * @param rule   The ids rule.
-     * @param target The accessed element.
+     * @param rule        The ids rule.
+     * @param target      The accessed element.
+     * @param consumerUri The URI of the consumer connector.
      * @throws PolicyRestrictionException If the access number has been reached.
      */
     private void validateAccessNumber(final Rule rule, final String target, final String consumerURI)
@@ -193,14 +207,14 @@ public class RuleValidator {
         }
     }
     
+
+    //TECNALIA-ICT-OPTIMA: New method. 
     /**
-     * Checks whether the consumer Role is allowed to access the data.
-								 
+     * Checks whether the consumer's Role is allowed to access the data.								 
      *
-     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
-     * @param consumerURI    the consumer URI.
-     * @return true, if the consumer Role is allowed to access the data; false otherwise.
-																	   
+     * @param rule        The ids rule.
+     * @param consumerURI The consumer URI.
+     * @throws PolicyRestrictionException If the role is not allowed to access the data.
      */
     public void validateRole(final Rule rule, String consumerURI)
             throws PolicyRestrictionException {
@@ -221,12 +235,13 @@ public class RuleValidator {
        }
     }
 
-    /**
-     * Checks whether the consumerś Purpose is allowed to access the data.
+    //TECNALIA-ICT-OPTIMA: New method. 
+     /**
+     * Checks whether it is allowed to access the data with the consumer's Purpose.
      *
-     * @param permissionList a list of {@link de.fraunhofer.iais.eis.Permission} objects.
-     * @param consumerURI    the consumer URI.
-     * @return true, if the consumerś Purpose is allowed to access the data; false otherwise.
+     * @param rule        The ids rule.
+     * @param consumerURI The consumer URI.
+     * @throws PolicyRestrictionException If it is not allowed to access the data with such Purpose.
      */
     public void validatePurpose(final Rule rule, String consumerURI)
             throws PolicyRestrictionException {

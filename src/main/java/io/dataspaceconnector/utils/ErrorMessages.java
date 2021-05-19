@@ -185,15 +185,19 @@ public enum ErrorMessages {
      */
     POLICY_RESTRICTION("Policy restriction detected."),
 
+    //TECNALIA-ICT-OPTIMA: New error message. 
     /**
      * Data has been accessed by an invalid role.
      */
     DATA_ACCESS_INVALID_ROLE("Data access by invalid role."),
 
+    //TECNALIA-ICT-OPTIMA: New error message.
     /**
      * Data has been accessed by an invalid purpose.
      */
-    DATA_ACCESS_INVALID_PURPOSE("Data access by invalid purpose.");    
+    DATA_ACCESS_INVALID_PURPOSE("Data access by invalid purpose.");  
+    
+    
     /**
      * Holds the enums string.
      */

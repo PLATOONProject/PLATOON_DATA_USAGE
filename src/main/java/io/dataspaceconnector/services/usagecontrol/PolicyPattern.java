@@ -66,16 +66,19 @@ public enum PolicyPattern {
     CONNECTOR_RESTRICTED_USAGE,
 
 
+    //TECNALIA-ICT-OPTIMA: New Policy Pattern. 
     /**
      * Type: Role based
      */
     ROLE_RESTRICTED_USAGE,
 
+    //TECNALIA-ICT-OPTIMA: New Policy Pattern. 
     /**
      * Type: Purpose restricted
      */
     PURPOSE_RESTRICTED_USAGE,
 
+    //TECNALIA-ICT-OPTIMA: New Policy Pattern. 
     /**
      * Type: Contains Personal Data
      */

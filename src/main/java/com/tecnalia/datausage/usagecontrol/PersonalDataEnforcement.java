@@ -71,25 +71,6 @@ public class PersonalDataEnforcement {
         
         return filteredDataObject.toString();
     }
-
-    public String enforceOld (Permission permission, String providerURI,
-            String consumerURI, String targetDataUri, String dataObject) {
-        
-        JSONArray filteredDataObject = new JSONArray();
-        
-        String consumerPurpose = getConsumerPurpose(permission, consumerURI);
-
-        JSONArray dataObjectsList = new JSONArray(dataObject);
-        for(Object onePersonDataObject: dataObjectsList) {
-            JSONObject onePersonDataObjectJson = (JSONObject)onePersonDataObject;
-            String userId = getUserId(permission, onePersonDataObjectJson);
-            JSONObject filteredOnePersonDataObjectJson = enforceConsents(consumerURI, providerURI,
-                            userId, targetDataUri, consumerPurpose, onePersonDataObjectJson);
-            filteredDataObject.put(filteredOnePersonDataObjectJson);           
-        }
-        
-        return filteredDataObject.toString();
-    }
     
     String getConsumerPurpose(Permission permission, String consumerURI) {
         String consumerPurposeAsString = "";  

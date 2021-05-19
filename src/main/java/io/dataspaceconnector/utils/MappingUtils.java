@@ -30,6 +30,7 @@ import de.fraunhofer.iais.eis.Representation;
 import de.fraunhofer.iais.eis.Resource;
 import de.fraunhofer.iais.eis.Rule;
 
+//TECNALIA-ICT-OPTIMA: Remove unused methods
 /**
  * Maps ids resources to internal resources.
  */

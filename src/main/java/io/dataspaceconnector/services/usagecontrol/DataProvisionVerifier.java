@@ -28,6 +28,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A {@link PolicyVerifier} implementation that checks whether data provision should be allowed.
+ */
 @Component
 @Log4j2
 @RequiredArgsConstructor
@@ -38,19 +41,26 @@ public class DataProvisionVerifier implements PolicyVerifier<VerificationInput> 
      */
     private final @NonNull RuleValidator ruleValidator;
 
+    //TECNALIA-ICT-OPTIMA: Different input parameters: 
+    // - consumerUri instead of issuerConnector
+    // - created: ContractAgreement start date
+    // - rules instead of agreement
     /**
      * Policy check on data provision on provider side.
      *
-     * @param target          The requested element.
-     * @param issuerConnector The issuer connector.
-     * @param agreement       The ids contract agreement.
+     * @param target      The requested element.
+     * @param consumerUri The URI of the consumer connector.
+     * @param created     The start date of the ContractAgreement.
+     * @param rules       The ids rule list.
      * @throws PolicyRestrictionException If a policy restriction has been detected.
      */
     public void checkPolicy(final String target,
                             final String consumerUri,
                             final Date created,
                             final ArrayList<Rule> rules) throws PolicyRestrictionException {
+        //TECNALIA-ICT-OPTIMA: Use variable instead of the ConnectorConfigurator
         final var ignoreUnsupportedPatterns = false;
+        //TECNALIA-ICT-OPTIMA: Remove some Policy Patterns
         final var patternsToCheck = Arrays.asList(
                 PolicyPattern.PROVIDE_ACCESS,
                 PolicyPattern.PROHIBIT_ACCESS,
@@ -65,13 +75,18 @@ public class DataProvisionVerifier implements PolicyVerifier<VerificationInput> 
         }
     }
 
+    //TECNALIA-ICT-OPTIMA: Different input parameters: 
+    // - consumerUri instead of issuerConnector
+    // - created: ContractAgreement start date
+    // - rules instead of agreement
     /**
      * Checks the contract content for data access (on provider side).
      *
-     * @param patterns        List of patterns that should be enforced.
-     * @param target          The requested element.
-     * @param issuerConnector The issuer connector.
-     * @param agreement       The ids contract agreement.
+     * @param patterns    List of patterns that should be enforced.
+     * @param target      The requested element.
+     * @param consumerUri The URI of the consumer connector.
+     * @param created     The start date of the ContractAgreement.
+     * @param rules       The ids rule list.
      * @throws PolicyRestrictionException If a policy restriction has been detected.
      */
     public void checkForAccess(final List<PolicyPattern> patterns,

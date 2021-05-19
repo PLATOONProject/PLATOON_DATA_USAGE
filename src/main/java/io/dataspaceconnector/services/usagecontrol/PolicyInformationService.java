@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Autowired;
 
+//TECNALIA-ICT-OPTMA: All the methods in this class have been modified.
 /**
  * This class provides access permission information for the {@link RuleValidator} depending on
  * the policy content.

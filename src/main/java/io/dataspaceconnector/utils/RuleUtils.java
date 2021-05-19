@@ -41,6 +41,7 @@ import java.util.Map;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+//TECNALIA-ICT-OPTIMA: Remove unused methods
 /**
  * Contains utility methods for validating the content of ids rules.
  */
@@ -69,6 +70,7 @@ public final class RuleUtils {
             final var constraints = rule.getConstraint();
             final var postDuties = ((Permission) rule).getPostDuty();
 
+            //TECNALIA-ICT-OPTIMA: Check for new rule related to Personal Data
             Map <String, Object> propsMap = rule.getProperties();
             if(propsMap != null) {
                 Object persDataCat = propsMap.get("http://www.w3.org/ns/dpv#hasPersonalDataCategory");
@@ -95,9 +97,11 @@ public final class RuleUtils {
                     } else if (leftOperand == LeftOperand.SYSTEM
                             && operator == BinaryOperator.SAME_AS) {
                         detectedPattern = PolicyPattern.CONNECTOR_RESTRICTED_USAGE;
+                    //TECNALIA-ICT-OPTIMA: Check for new rule
                     } else if ((leftOperand == LeftOperand.USER )
                             && (((Constraint)constraints.get(0)).getOperator() == BinaryOperator.HAS_MEMBERSHIP))  {
                         detectedPattern = PolicyPattern.ROLE_RESTRICTED_USAGE;
+                    //TECNALIA-ICT-OPTIMA: Check for new rule
                     } else if ((leftOperand == LeftOperand.PURPOSE )
                             && (((Constraint)constraints.get(0)).getOperator() == BinaryOperator.SAME_AS))  {
                         detectedPattern = PolicyPattern.PURPOSE_RESTRICTED_USAGE;
@@ -124,6 +128,7 @@ public final class RuleUtils {
         return detectedPattern;
     }
 
+    //TECNALIA-ICT-OPTIMA: Use java.util.Date instead of java.time.ZonedDateTime
     /**
      * Checks whether the current date is later than the specified one.
      *
@@ -231,6 +236,7 @@ public final class RuleUtils {
         return MappingUtils.getDateOf(date);
     }
 
+    //TECNALIA-ICT-OPTIMA: Use javax.xml.datatype.Duration instead of java.time.Duration
     /**
      * Gets the duration value defined in a policy.
      *
@@ -249,6 +255,8 @@ public final class RuleUtils {
         }
     }
 
+    //TECNALIA-ICT-OPTIMA: Use java.util.Date instead of java.time.ZonedDateTime
+    //TECNALIA-ICT-OPTIMA: Use javax.xml.datatype.Duration instead of java.time.Duration
     /**
      * Add duration to a date to calculate a new date.
      *
@@ -295,6 +303,7 @@ public final class RuleUtils {
         return ZonedDateTime.now(ZoneOffset.UTC);
     }
     
+    //TECNALIA-ICT-OPTIMA: New function for new rule
     /**
      * Returns the allowed Role.
      *
@@ -307,6 +316,7 @@ public final class RuleUtils {
         return allowedRole;
     }
 
+    //TECNALIA-ICT-OPTIMA: New function for new rule
     /**
      * Returns the allowed Purpose.
      *
