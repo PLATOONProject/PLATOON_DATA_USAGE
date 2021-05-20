@@ -19,10 +19,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 
 public interface RuleRepository extends JpaRepository<RuleStore, String> {
-    Optional<RuleStore> findByContractId(String contracUuid);
-    List<RuleStore> deleteByContractId(String policyId);
+    Iterable<RuleStore> findAllByContractId(String contractId);
+    List<RuleStore> deleteByContractId(String contractId);
     List<RuleStore> deleteByContractUuid(String contracUuid);
     Iterable<RuleStore> findAllByContractUuidAndTargetId(String contractUuid, String targetId);
-    Optional<RuleStore> findByContractUuidAndTargetId(String contractUuid, String targetId);
     
 }

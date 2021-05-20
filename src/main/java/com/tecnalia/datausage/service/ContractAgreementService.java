@@ -118,11 +118,11 @@ public class ContractAgreementService {
             }
             
             //update rules 
-            Optional<RuleStore> bCheckExistsRule = this.ruleRepository.findByContractId(contract.getId().toString());
+            Iterable<RuleStore> ruleList = this.ruleRepository.findAllByContractId(contract.getId().toString());
                
             
                 //if exists delete
-            if (bCheckExistsRule.isPresent()) {
+            if (ruleList.iterator().hasNext()) {
            
                List<RuleStore> ruleStores=this.ruleRepository.deleteByContractId(contract.getId().toString());
                log.info("PolicyService:::policyId :"+ruleStores.size());

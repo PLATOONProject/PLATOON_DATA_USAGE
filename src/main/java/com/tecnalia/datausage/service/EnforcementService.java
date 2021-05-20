@@ -242,8 +242,8 @@ public class EnforcementService {
         Date latestContractDate = null;
         for (ContractStore contractStore: contractList) {
             //Firstly check if conract applies to targetDataUri
-            Optional<RuleStore> bCheckExistsRule = this.ruleRepository.findByContractUuidAndTargetId(contractStore.getContractUuid(), targetDataUri);
-            if(!bCheckExistsRule.isPresent())
+            Iterable<RuleStore> ruleList = this.ruleRepository.findAllByContractUuidAndTargetId(contractStore.getContractUuid(), targetDataUri);
+            if(!ruleList.iterator().hasNext())
                 //If contract not applies to targetDataUri, do not consider it
                 continue;
             String contractTxt = contractStore.getContractAsString();
