@@ -219,6 +219,12 @@ public class RuleValidator {
     public void validateRole(final Rule rule, String consumerURI)
             throws PolicyRestrictionException {
         URI allowedRoleURI = RuleUtils.getAllowedRole(rule);
+        if (allowedRoleURI == null) {
+            if (log.isWarnEnabled()) {
+                log.warn("Role is null. [rule=({})]", rule);
+            }
+            throw new PolicyRestrictionException(ErrorMessages.DATA_ACCESS_INVALID_ROLE);
+        }
         String allowedRoleAsString = allowedRoleURI.toString();
         String consumerRoleAsString = "";
         URI pipEndpoint = RuleUtils.getPipEndpoint(rule);
@@ -246,11 +252,17 @@ public class RuleValidator {
     public void validatePurpose(final Rule rule, String consumerURI)
             throws PolicyRestrictionException {
         URI allowedPurposeURI = RuleUtils.getAllowedPurpose(rule);
+        if (allowedPurposeURI == null) {
+            if (log.isWarnEnabled()) {
+                log.warn("Purpose is null. [rule=({})]", rule);
+            }
+            throw new PolicyRestrictionException(ErrorMessages.DATA_ACCESS_INVALID_PURPOSE);
+        }
         String allowedRoleAsString = allowedPurposeURI.toString();
         String consumerPurposeAsString = "";
         URI pipEndpoint = RuleUtils.getPipEndpoint(rule);
         
-       try {
+        try {
             String encodedConsumerUri =  URLEncoder.encode(consumerURI, StandardCharsets.UTF_8.toString());
             consumerPurposeAsString = informationService.getRemoteInfo(
                     pipEndpoint + "?consumerUri="+ encodedConsumerUri);

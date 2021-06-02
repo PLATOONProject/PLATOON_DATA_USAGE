@@ -106,7 +106,6 @@ public class PersonalDataEnforcement {
                             String userId, String targetDataUri, String consumerPurpose, 
                             JSONObject onePersonDataObjectJson) {
         JSONObject filteredOnePersonDataObjectJson = new JSONObject();
-        //TODO- Invoke CaPe API to filter one person's data
         Map<String,String>params = new HashMap<String, String>();
         params.put("sinkServiceId:", consumerURI);
         params.put("sourceServiceId::", providerURI);
@@ -118,9 +117,6 @@ public class PersonalDataEnforcement {
         } catch (URISyntaxException | RuntimeException e) {
         }
         
-        //TODO- Quitar esta línea y dejar lo que devuelve CaPe
-        filteredOnePersonDataObjectJson = onePersonDataObjectJson;
-
         return filteredOnePersonDataObjectJson;
     }
 }
