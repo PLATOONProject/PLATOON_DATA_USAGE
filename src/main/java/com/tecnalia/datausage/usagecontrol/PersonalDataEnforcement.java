@@ -35,6 +35,14 @@ import org.springframework.stereotype.Component;
 public class PersonalDataEnforcement {
     @Value("${cape.enforce.usage.url}")
     private String enforceConsentsUrl = "";
+    @Value("${cape.auth.server.url}")
+    private String enforceAuthServerUrl = "";
+    @Value("${cape.auth.client.id}")
+    private String enforceAuthClientId = "";
+    @Value("${cape.auth.client.secret}")
+    private String enforceAuthClientSecret = "";
+    @Value("${cape.auth.grant.type}")
+    private String enforceAuthGrantType = "";
     
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalDataEnforcement.class);
     
@@ -107,13 +115,17 @@ public class PersonalDataEnforcement {
                             JSONObject onePersonDataObjectJson) {
         JSONObject filteredOnePersonDataObjectJson = new JSONObject();
         Map<String,String>params = new HashMap<String, String>();
-        params.put("sinkServiceId:", consumerURI);
-        params.put("sourceServiceId::", providerURI);
-        params.put("userId::", userId);
-        params.put("datasetId::", targetDataUri);
-        params.put("purposeCategory::", consumerPurpose);
+        params.put("sinkServiceUrl", consumerURI);
+        params.put("sourceServiceUrl", providerURI);
+        params.put("userId", userId);
+        params.put("datasetId", targetDataUri);
+        params.put("checkConsentAtOperator", "true");
+        params.put("purposeName", consumerPurpose);
         try {
-            String filteredOnePersonDataObjectAsString = httpUtils.sendHttpPostRequest(enforceConsentsUrl, params, onePersonDataObjectJson.toString());
+            String filteredOnePersonDataObjectAsString = httpUtils.sendHttpPostRequestWithOAuth(
+                        enforceConsentsUrl, params, onePersonDataObjectJson.toString(),
+                        enforceAuthServerUrl, enforceAuthClientId, enforceAuthClientSecret, enforceAuthGrantType);
+            filteredOnePersonDataObjectJson = new JSONObject(filteredOnePersonDataObjectAsString);
         } catch (URISyntaxException | RuntimeException e) {
         }
         
