@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+  postgres:
+    image: postgres
+    
+    ports:
+      - 5434:5432
+    env_file:
+      - ./postgres.env
+    networks:
+      - datausage
+    volumes:
+      - app:/var/lib/postgresql/data
+
+
+  
+  datausage:
+    build:
+      context: ./datausage
+    container_name: 'datausage-container'
+    ports:
+      - 8080:8080
+      - 443:443
+    env_file:
+      - ./datausage.env
+    networks:
+      - datausage
+    depends_on:
+      - postgres
+
+  pip:
+    build:
+      context: ./pip
+    container_name: 'pip-container'
+    ports:
+      - 8085:8085
+    networks:
+      - datausage
+  
+
+
+networks:
+  datausage:
+ 
+volumes:
+  app: {}
+  
+
+
+
+
+
+
+
