@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
  * @author usuario
  */
 @Component
+@PropertySource("file:/etc/platoon_datausage_cape.properties")
 public class PersonalDataEnforcement {
     @Value("${cape.enforce.usage.url}")
     private String enforceConsentsUrl = "";
