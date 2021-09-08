@@ -9,15 +9,13 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.tecnalia.datausage.utils.HttpUtils;
 import de.fraunhofer.iais.eis.Permission;
-import de.fraunhofer.iais.eis.Rule;
 import de.fraunhofer.iais.eis.util.TypedLiteral;
-import de.fraunhofer.isst.dataspaceconnector.services.usagecontrol.PolicyReader;
+import io.dataspaceconnector.utils.RuleUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONArray;
@@ -48,18 +46,14 @@ public class PersonalDataEnforcement {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonalDataEnforcement.class);
     
-    private final PolicyReader policyReader;
     private final HttpUtils httpUtils;
 
-    public PersonalDataEnforcement(PolicyReader policyReader, HttpUtils httpUtils)
+    public PersonalDataEnforcement(HttpUtils httpUtils)
         throws IllegalArgumentException {
-        if (policyReader == null)
-            throw new IllegalArgumentException("The PolicyReader cannot be null.");
 
         if (httpUtils == null)
             throw new IllegalArgumentException("The HttpUtils cannot be null.");
 
-        this.policyReader = policyReader;
         this.httpUtils = httpUtils;
     }
 
@@ -84,7 +78,7 @@ public class PersonalDataEnforcement {
     
     String getConsumerPurpose(Permission permission, String consumerURI) {
         String consumerPurposeAsString = "";  
-        URI pip = policyReader.getPipEndpoint(permission.getPreDuty().get(0));
+        URI pip = RuleUtils.getPipEndpoint(permission.getPreDuty().get(0));
         
         try {
             String encodedConsumerUri =  URLEncoder.encode(consumerURI, StandardCharsets.UTF_8.toString());

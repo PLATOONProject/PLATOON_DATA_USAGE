@@ -42,11 +42,7 @@ import javax.transaction.Transactional;
  * @author root
  */
 
-/*@ComponentScan({
-     "de.fraunhofer.isst.ids.framework.configuration.SerializerProvider","io.swagger.repository.OdrlPolicyRepo"})*/
-//@ComponentScan(basePackages = { "io.swagger.configuration","de.fraunhofer.isst.ids.framework.configuration.SerializerProvider"})
 @Service
-//@Component
 public class ContractAgreementService {
     
      private static final Logger log = LoggerFactory.getLogger(ContractAgreementService.class);
