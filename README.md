@@ -40,21 +40,18 @@ The data Usage Control module supports usage policies written in the IDS Usage C
 - Personal Data: filter out the contents of the data according to the data subject´s consents. To apply this rule, the Usage Control module interacts with CaPe.
 
 
-## 3. Software Prerequisites
+
+
+## 3  Installation Guide
 
 
 
+### 3.1 Running the Application
 
-## 4  Installation Guide
-
-
-
-### 4.3 Running the Application
+To start up the Platoon Data Usage, run the following command inside the directory "Docker_Tecnalia_DataUsage" of the docker-compose.yml file: docker-compose up -d
 
 
 
-
-
-## 5 License
+## 4 License
 
 Licensed under the Apache 2.0. See LICENSE.txt for more details. 
