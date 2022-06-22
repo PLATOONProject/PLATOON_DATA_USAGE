@@ -27,15 +27,16 @@ public class Swagger2SpringBoot {
 		new SpringApplication(Swagger2SpringBoot.class).run(args);
 	}
 
+	//	@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri
 	@Bean
-	public OpenAPI openApi(@Value("${server.servlet.context-path}") String contextPath,
-			@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
+	public OpenAPI openApi(@Value("${server.servlet.context-path}") String contextPath) {
 		return new OpenAPI()
 				.info(new Info().title("Platoon Data Usage").description("Api Documentation").termsOfService("")
 						.version("1.0")
 						.license(new License().name("Apache 2.0").url("http://www.apache.org/licenses/LICENSE-2.0"))
-						.contact(new io.swagger.v3.oas.models.info.Contact().email("")))
-				.addServersItem(new Server().url(contextPath))
+						.contact(new io.swagger.v3.oas.models.info.Contact().email("")));
+		/*		
+		.addServersItem(new Server().url(contextPath))
 				.components(new Components()
 						.addSecuritySchemes("openid-connect",
 								new SecurityScheme().type(SecurityScheme.Type.OPENIDCONNECT)
@@ -45,6 +46,7 @@ public class Swagger2SpringBoot {
 										.bearerFormat("JWT")))
 				.addSecurityItem(new SecurityRequirement().addList("bearer-jwt", Arrays.asList("read", "write")))
 				.addSecurityItem(new SecurityRequirement().addList("openid-connect", Arrays.asList("read", "write")));
+		 */
 	}
 
 }

@@ -23,10 +23,25 @@ public class JWTSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable().formLogin().disable().headers().httpStrictTransportSecurity().disable().and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS).and()
-				.authorizeRequests(authz -> authz.antMatchers("/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**","/platoontec/**")
-						.permitAll().anyRequest().authenticated())
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt());
-	}}
-
+		http
+		.cors()
+		.and()
+		.formLogin().disable()
+		.headers().httpStrictTransportSecurity().disable().and()
+		.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+			.and()
+		.authorizeRequests()
+		.antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/platoontec/**")
+		.permitAll()
+		.and()
+		.csrf().disable();
+		
+//		http.cors().and().csrf().disable().formLogin().disable().headers().httpStrictTransportSecurity().disable().and()
+//				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS).and()
+//				.authorizeRequests(authz -> authz
+//						.antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/platoontec/**")
+//						.permitAll().anyRequest().authenticated())
+//				.oauth2ResourceServer(oauth2 -> oauth2.jwt());
+	}
+}
