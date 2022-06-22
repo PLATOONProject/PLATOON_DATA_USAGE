@@ -106,7 +106,6 @@ public class PersonalDataEnforcement {
         return userId;
     }
 
-
     public JSONObject enforceConsents(String consumerURI, String providerURI,
                             String userId, String targetDataUri, String consumerPurpose, 
                             JSONObject onePersonDataObjectJson) {
