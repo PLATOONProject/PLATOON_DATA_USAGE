@@ -287,9 +287,9 @@
 
         <!-- swagger_ui -->
         <dependency>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-ui</artifactId>
-        <version>1.5.9</version>
+	        <groupId>org.springdoc</groupId>
+	        <artifactId>springdoc-openapi-ui</artifactId>
+	        <version>1.5.9</version>
         </dependency>
         <!-- oauth -->
         <!-- 
@@ -304,14 +304,6 @@
 			<version>2.5.0</version>
 		</dependency>
 		-->
-   		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-		</dependency>
 
 <!--
   <dependency>

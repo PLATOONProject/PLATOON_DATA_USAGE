@@ -41,7 +41,14 @@ public class EnforceApiController implements EnforceApi {
     public ResponseEntity<Object> usageControlUseUsingPOST(@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "targetDataUri", required = true) String targetDataUri,@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "providerUri", required = true) String providerUri,@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consumerUri", required = true) String consumerUri,@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consuming", required = true) Boolean consuming,@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody String body) {
           String accept = request.getHeader("Accept");
           log.info("Enforcing policy for target {}", targetDataUri);
-          return enforcementService.enforce(targetDataUri,providerUri,consumerUri,consuming,body);
+          return enforcementService.enforce(targetDataUri, providerUri, consumerUri, consuming, body);
     }
+
+	@Override
+	public ResponseEntity<Object> enforceContractAgreementPOST(@NotNull @Valid String contractAgreement,
+			@NotNull @Valid Boolean consuming, @Valid String body) {
+		log.info("Enforcing policy for agreement {}", contractAgreement);
+        return enforcementService.enforceAgreement(contractAgreement, consuming, body);
+	}
 
 }

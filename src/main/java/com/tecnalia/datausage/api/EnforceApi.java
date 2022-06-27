@@ -42,5 +42,24 @@ public interface EnforceApi {
         method = RequestMethod.POST)
     ResponseEntity<Object> usageControlUseUsingPOST(@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "targetDataUri", required = true) String targetDataUri, @NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "providerUri", required = true) String providerUri, @NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consumerUri", required = true) String consumerUri, @NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consuming", required = true) Boolean consuming, @Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody String body);
 
+    @Operation(summary = "enforce contract Agreement", description = "", tags={ "enforce-usage-controller-agreement" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "OK"),
+        
+        @ApiResponse(responseCode = "201", description = "Created"),
+        
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        
+        @ApiResponse(responseCode = "404", description = "Not Found") })
+    @RequestMapping(value = "/enforce/usage/agreement",
+        consumes = { "application/json" }, 
+        method = RequestMethod.POST)
+    ResponseEntity<Object> enforceContractAgreementPOST(
+    		@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "contractAgreementUri", required = true) String contractAgreement, 
+    		@NotNull @Parameter(in = ParameterIn.QUERY, description = "" ,required=true,schema=@Schema()) @Valid @RequestParam(value = "consuming", required = true) Boolean consuming, 
+    		@Parameter(in = ParameterIn.DEFAULT, description = "", schema=@Schema()) @Valid @RequestBody String body);
+
 }
 

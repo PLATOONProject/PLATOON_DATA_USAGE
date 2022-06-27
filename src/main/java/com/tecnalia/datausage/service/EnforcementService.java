@@ -7,7 +7,6 @@ package com.tecnalia.datausage.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -157,7 +156,117 @@ public class EnforcementService {
 					HttpStatus.FORBIDDEN);
 		}
 	}
+	
+	public ResponseEntity<Object> enforceAgreement(String contractAgreement, boolean consuming, String body) {
+		// Get contracts from ContractAgreement table applied to this providerURI &
+		// consumerUri
+		Optional<ContractStore> contractStoreOptional = this.contractRepository.findByContractId(contractAgreement);
+		// Get contracts that apply to targetUri and which start-end dates are valid
+		// according to current date, and get the most recent Contract
+		if(contractStoreOptional.isEmpty()) {
+			LOGGER.info("No valid contract found");
+			return new ResponseEntity<>("No valid contract found", HttpStatus.BAD_REQUEST);
+		}
+		ContractStore contractStore = contractStoreOptional.get();
+		Contract contract = null;
+		Date validContractStart = null;
+		try {
+			contract = serializer.deserialize(contractStore.getContractAsString(), Contract.class);
+			validContractStart = contract.getContractStart().toGregorianCalendar().getTime();
+		} catch (Exception e) {
+			LOGGER.info("Incorrect contract format");
+			return new ResponseEntity<>("Incorrect contract format", HttpStatus.BAD_REQUEST);
+		}
 
+		boolean isActive = isContractActive(contract);
+		if (!isActive) {
+			LOGGER.info("Contract is not active or expired");
+			return new ResponseEntity<>("Contract is not active or expired", HttpStatus.BAD_REQUEST);
+		}
+
+		// Get rules from rule table applied to the contract, targetDataUri
+		String targetDataUri = contract.getPermission().get(0).getTarget().toString();
+		String providerUri =  contractStore.getProviderId();
+		String consumerUri =  contractStore.getConsumerId();
+		
+		Iterable<RuleStore> ruleList = this.ruleRepository
+				.findAllByContractUuidAndTargetId(contractStore.getContractUuid(), targetDataUri);
+		ArrayList<Rule> ruleArrayList = new ArrayList<>();
+		for (RuleStore ruleStore : ruleList) {
+			String ruleTxt = ruleStore.getRuleContent();
+			String ruleType = getRuleType(ruleTxt);
+			try {
+				if (ruleType.compareToIgnoreCase("Permission") == 0) {
+					Permission perm = serializer.deserialize(ruleTxt, Permission.class);
+					ruleArrayList.add(perm);
+				} else if (ruleType.compareToIgnoreCase("Prohibition") == 0) {
+					Prohibition prohib = serializer.deserialize(ruleTxt, Prohibition.class);
+					ruleArrayList.add((Prohibition) prohib);
+				}
+			} catch (Exception e) {
+				LOGGER.info("Invalid rule format");
+				return new ResponseEntity<>("Invalid rule format", HttpStatus.BAD_REQUEST);
+			}
+		}
+
+		
+		// Apply enforcement
+		boolean allowAccess = false;
+		String filteredDataObject = body;
+		final var input = new VerificationInput(targetDataUri, ruleArrayList, consumerUri, validContractStart);
+		if (consuming) {
+			// For each rule, apply enforcement
+			if (accessVerifier.verify(input) == VerificationResult.ALLOWED) {
+				allowAccess = true;
+				// Check for Personal Data Rule
+				for (Rule rule : ruleArrayList) {
+					final var pattern = RuleUtils.getPatternByRule(rule);
+					if (pattern == PolicyPattern.PERSONAL_DATA) {
+						filteredDataObject = personalDataEnforcement.enforce((Permission) rule, providerUri,
+								consumerUri, targetDataUri, body);
+						break;
+					}
+
+				}
+			}
+
+			if (allowAccess)
+				incrementAccessFrequency(targetDataUri, consumerUri);
+		} else {
+			// For each rule, apply enforcement
+			if (provisionVerifier.verify(input) == VerificationResult.ALLOWED) {
+				allowAccess = true;
+			}
+		}
+
+		if (allowAccess) {
+			LOGGER.info("Allowed access for target {}", targetDataUri);
+			return new ResponseEntity<>(filteredDataObject, HttpStatus.OK);
+		} else {
+			LOGGER.info("PDP decided to inhibit the usage: Event is not allowed according to policy for target {}", targetDataUri);
+			return new ResponseEntity<>("PDP decided to inhibit the usage: Event is not allowed according to policy",
+					HttpStatus.FORBIDDEN);
+		}
+	}
+
+	private boolean isContractActive(Contract contract) {
+		boolean isValid = false;
+		Date contractStart = contract.getContractStart().toGregorianCalendar().getTime();
+		Date contractEnd = null;
+		XMLGregorianCalendar contractEndGregCal = contract.getContractEnd();
+		if (contractEndGregCal != null) {
+			contractEnd = contractEndGregCal.toGregorianCalendar().getTime();
+		}
+//		Date contractDate = contract.getContractDate().toGregorianCalendar().getTime();
+		Date date = new Date();
+		if (date.after(contractStart)
+				&& ((contractEnd == null) || (contractEnd != null && date.before(contractEnd)))) {
+			isValid = true;
+			LOGGER.debug("Contract is active");
+		}
+		return isValid;
+	}
+	
 	ContractStore getValidContracts(Iterable<ContractStore> contractList, String targetDataUri) {
 		// Get contracts that apply to targetUri and which start-end dates are valid
 		// according to current date, and get the most recent Contract
