@@ -4,7 +4,7 @@
     <artifactId>dataUsage</artifactId>
     <packaging>jar</packaging>
     <name>dataUsage</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <properties>
         <java.version>11</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -55,17 +55,33 @@
 				<configuration>
 					<finalName>dataUsage</finalName>
 					<archive>
-<!-- 						<manifest> -->
-<!-- 							<addClasspath>true</addClasspath> -->
-<!-- 							<mainClass>it.eng.idsa.dataapp.ApplicationDataApp</mainClass> -->
-<!-- 							<classpathPrefix>dependency-jars/</classpathPrefix> -->
-<!-- 							<useUniqueVersions>false</useUniqueVersions> -->
-<!-- 						</manifest> -->
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>com.tecnalia.datausage.Swagger2SpringBoot</mainClass>
+							<classpathPrefix>dependency-jars/</classpathPrefix>
+							<useUniqueVersions>false</useUniqueVersions>
+						</manifest>
 						<manifestEntries>
 							<Class-Path>. /etc/ </Class-Path>
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
         </plugins>
     </build>
