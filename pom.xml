@@ -45,6 +45,7 @@
                     <execution>
                         <goals>
                             <goal>repackage</goal>
+                            <goal>build-info</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -298,8 +299,6 @@
             <artifactId>validation-serialization-provider</artifactId>
             <version>${de.fraunhofer.iais.eis.ids.infomodel.validator.version}</version>
         </dependency>      
-
-
 
         <!-- swagger_ui -->
         <dependency>
