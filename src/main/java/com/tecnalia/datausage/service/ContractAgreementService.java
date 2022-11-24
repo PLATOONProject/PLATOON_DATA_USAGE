@@ -176,7 +176,7 @@ public class ContractAgreementService {
 				}
 				return new ResponseEntity<String>("Contract Agreement has been deleted", HttpStatus.OK);
 			} else
-				return new ResponseEntity<String>("Contract Agreement isn't exists", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<String>("Contract Agreement does not exists", HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
 
 			return new ResponseEntity<String>("An error happened during contract agreement deletion process",
