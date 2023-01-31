@@ -300,6 +300,8 @@
             <version>${de.fraunhofer.iais.eis.ids.infomodel.validator.version}</version>
         </dependency>      
 
+
+
         <!-- swagger_ui -->
         <dependency>
 	        <groupId>org.springdoc</groupId>

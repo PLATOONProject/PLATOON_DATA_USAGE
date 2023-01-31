@@ -10,7 +10,7 @@ This module does not include the Contract Negotiation process. This negotiation 
 ## 1. Architecture
 
 The Data Usage Control is composed of the following components:
--	A PostgreSQL database, where the Constract Agreements are stored. This database contains the following tables:
+-	Database store, where the Contract Agreements are stored. This database contains the following tables:
     - Contract_store: the whole contract agreement content in JSON-LD format is stored in the “contract_as_string” column.
     - Rule_store: a contract may contain several rules. Each of these rules is stored in this table and the rule content in JSON-LD format is stored in the "rule_content” column.
     -	Access_store: this table stores the number of times a consumer has accessed a specific target/data, in the “num_access” column. This table is used to apply the policy pattern “N Times Usage” 
@@ -60,7 +60,15 @@ This will create docker image; specific tag can also be added to the command sim
 
 To start up the Platoon Data Usage, run the following command inside the directory "Docker_Tecnalia_DataUsage" of the docker-compose.yml file: docker-compose up -d
 
+### 3.3 Database profiles
 
+There are 2 supported database profiles:
+
+ - PostgreSQL - this profile will require to have configured PostgreSQL as a service, either as installed application or running as docker container. To check DB related properties for PostgreSQL, please check src/main/resources/application-POSTGRES.properties</br>
+ When running as SpringBoot application, set -Dprofile=POSTGRES
+ - H2 (in memory db) - for faster use of UsageControl dataApp, this profile might be more suitable, since it does not require additional service, like in PostgreSQL profile.</br>
+ Property file can be found in src/main/resources/application-H2.properties, and when running as SpringBoot, -Dprofile=H2
+ 
 
 ## 4 License
 
