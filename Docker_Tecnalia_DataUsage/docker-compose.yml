@@ -13,8 +13,6 @@ services:
     volumes:
       - app:/var/lib/postgresql/data
 
-
-  
   datausage:
     build:
       context: ./datausage
@@ -38,18 +36,8 @@ services:
     networks:
       - datausage
   
-
-
 networks:
   datausage:
  
 volumes:
   app: {}
-  
-
-
-
-
-
-
-
