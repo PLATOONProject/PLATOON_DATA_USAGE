@@ -79,9 +79,9 @@ public final class RuleUtils {
                 }
             }
             
-            if (constraints != null && constraints.get(0) != null) {
+            if (!constraints.isEmpty() && constraints.get(0) != null) {
                 if (constraints.size() > 1) {
-                    if (postDuties != null && postDuties.get(0) != null) {
+                    if (!postDuties.isEmpty() && postDuties.get(0) != null) {
                         detectedPattern = PolicyPattern.USAGE_UNTIL_DELETION;
                     } else {
                         detectedPattern = PolicyPattern.USAGE_DURING_INTERVAL;
@@ -110,7 +110,7 @@ public final class RuleUtils {
                     }
                 }
             } else {
-                if (postDuties != null && postDuties.get(0) != null) {
+                if (!postDuties.isEmpty() && postDuties.get(0) != null) {
                     final var action = postDuties.get(0).getAction().get(0);
                     if (action == Action.NOTIFY) {
                         detectedPattern = PolicyPattern.USAGE_NOTIFICATION;
